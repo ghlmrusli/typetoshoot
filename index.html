@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-     <title>Word Shooter</title>
+    <title>Word Shooter</title>
     
     <!-- Open Graph -->
     <meta property="og:title" content="🚀 Word Shooter">
@@ -266,8 +266,8 @@
         #onScreenKeyboard {
             display: none;
             flex-direction: column;
-            gap: 10px;
-            padding: 20px 15px;
+            gap: 0;  /* Remove gap between rows */
+            padding: 0;  /* Remove all padding */
             background: transparent;  /* Remove dark background */
             border-radius: 0;  /* Remove border radius */
             position: absolute;
@@ -275,6 +275,11 @@
             left: 0;
             width: 100%;
             z-index: 510;
+        }
+        
+        /* Hide normal keyboard during challenge */
+        #onScreenKeyboard.hide-for-challenge {
+            display: none !important;
         }
         
         .keyboard-row {
@@ -325,7 +330,7 @@
             #onScreenKeyboard {
                 display: flex;
                 gap: 0;  /* Remove gap between rows */
-                padding: 10px 0;  /* Reduce padding */
+                padding: 0;  /* Remove all padding - attach to bottom */
             }
             
             #mobileInput {
@@ -868,6 +873,190 @@
             font-family: 'Press Start 2P', cursive;
         }
 
+        /* Challenge Screen */
+        #challengeScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            background: rgba(0, 0, 0, 0.5);  /* 50% black instead of 95% */
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2500;
+        }
+
+        #challengeScreen.show {
+            display: flex;
+        }
+
+        #challengeContent {
+            text-align: center;
+            max-width: 90%;
+            padding: 40px;
+        }
+
+        #challengeTimer {
+            font-size: 28px;  /* Same size as title */
+            color: #ff4757;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
+        }
+
+        #challengeTitle {
+            font-size: 28px;
+            color: #ffd700;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        #challengeSentence {
+            font-size: 24px;
+            color: white;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            letter-spacing: 2px;
+        }
+
+        #challengeSentence .char {
+            position: relative;
+        }
+
+        #challengeSentence .char.correct {
+            color: #10b981;
+        }
+
+        #challengeSentence .char.current {
+            background: rgba(255, 215, 0, 0.3);
+            animation: blink 0.8s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        #challengeInput {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.6);
+            min-height: 30px;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        /* Challenge keyboard - hidden on desktop */
+        #challengeKeyboard {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            #challengeTitle {
+                font-size: 20px;
+            }
+
+            #challengeTimer {
+                font-size: 20px;
+            }
+
+            #challengeSentence {
+                font-size: 18px;
+                letter-spacing: 1px;
+            }
+
+            #challengeInput {
+                font-size: 14px;
+            }
+
+            #challengeContent {
+                padding: 20px;
+            }
+
+            /* Show keyboard on mobile/tablet */
+            #challengeKeyboard {
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+                width: 100%;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                z-index: 3000;
+            }
+
+            .challenge-keyboard-row {
+                display: flex;
+                justify-content: center;
+                gap: 0;
+            }
+
+            .challenge-key {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                color: white;
+                font-size: 18px;
+                font-weight: bold;
+                font-family: 'Press Start 2P', cursive;
+                height: 52px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 0;
+                cursor: pointer;
+                transition: all 0.1s;
+                user-select: none;
+                -webkit-user-select: none;
+                -webkit-tap-highlight-color: transparent;
+                border-right: 0.5px solid rgba(255, 255, 255, 0.1);
+                border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .challenge-key:active {
+                background: rgba(16, 185, 129, 0.5);
+                transform: scale(0.95);
+            }
+
+            .challenge-keyboard-row:first-child .challenge-key {
+                width: calc(100% / 10);
+            }
+
+            .challenge-keyboard-row:nth-child(2) .challenge-key {
+                width: calc(100% / 9);
+            }
+
+            .challenge-keyboard-row:nth-child(3) .challenge-key {
+                width: calc(100% / 8);  /* 8 keys now (removed space) */
+            }
+
+            .challenge-keyboard-row:nth-child(4) .challenge-key {
+                width: 100%;  /* Full width spacebar */
+            }
+
+            .challenge-key.spacebar {
+                width: 100%;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .challenge-key {
+                height: 50px;
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 375px) {
+            .challenge-key {
+                height: 48px;
+                font-size: 14px;
+            }
+        }
+
+
         /* Time Selection Screen */
         #timeSelection {
             position: fixed;
@@ -1378,6 +1567,56 @@
         </div>
     </div>
 
+    <!-- Challenge Screen -->
+    <div id="challengeScreen">
+        <div id="challengeContent">
+            <div id="challengeTimer">20 Sec</div>
+            <h2 id="challengeTitle">SPEED ROUND</h2>
+            <div id="challengeSentence"></div>
+            <div id="challengeInput"></div>
+        </div>
+        
+        <!-- On-screen keyboard for mobile/tablet -->
+        <div id="challengeKeyboard">
+            <div class="challenge-keyboard-row">
+                <div class="challenge-key" data-key="q">Q</div>
+                <div class="challenge-key" data-key="w">W</div>
+                <div class="challenge-key" data-key="e">E</div>
+                <div class="challenge-key" data-key="r">R</div>
+                <div class="challenge-key" data-key="t">T</div>
+                <div class="challenge-key" data-key="y">Y</div>
+                <div class="challenge-key" data-key="u">U</div>
+                <div class="challenge-key" data-key="i">I</div>
+                <div class="challenge-key" data-key="o">O</div>
+                <div class="challenge-key" data-key="p">P</div>
+            </div>
+            <div class="challenge-keyboard-row">
+                <div class="challenge-key" data-key="a">A</div>
+                <div class="challenge-key" data-key="s">S</div>
+                <div class="challenge-key" data-key="d">D</div>
+                <div class="challenge-key" data-key="f">F</div>
+                <div class="challenge-key" data-key="g">G</div>
+                <div class="challenge-key" data-key="h">H</div>
+                <div class="challenge-key" data-key="j">J</div>
+                <div class="challenge-key" data-key="k">K</div>
+                <div class="challenge-key" data-key="l">L</div>
+            </div>
+            <div class="challenge-keyboard-row">
+                <div class="challenge-key" data-key="z">Z</div>
+                <div class="challenge-key" data-key="x">X</div>
+                <div class="challenge-key" data-key="c">C</div>
+                <div class="challenge-key" data-key="v">V</div>
+                <div class="challenge-key" data-key="b">B</div>
+                <div class="challenge-key" data-key="n">N</div>
+                <div class="challenge-key" data-key="m">M</div>
+                <div class="challenge-key" data-key="backspace">⌫</div>
+            </div>
+            <div class="challenge-keyboard-row">
+                <div class="challenge-key spacebar" data-key=" ">Space</div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Game state
         const game = {
@@ -1393,8 +1632,24 @@
             lastSpawn: 0,
             spawnInterval: 2500,
             invaderSpeed: 0.3,
-            maxInvaders: 3
+            maxInvaders: 3,
+            isChallenge: false,
+            challengeTimer: null,
+            challengeTimeLeft: 20,
+            completedChallenges: []
         };
+
+        // Challenge sentences for milestone scores
+        const challengeSentences = [
+            "Jovial zebras quickly vexed my big friend Chuck.",
+            "Pack my box with five dozen liquor jugs.",
+            "The quick brown fox jumps over the lazy dog.",
+            "Crazy Fredrick bought many very exquisite opal jewels.",
+            "A wizard's job is to vex chumps quickly in fog.",
+            "Sympathizing would fix Quaker objectives justly."
+        ];
+        
+        const challengeMilestones = [200, 300, 400, 500, 600, 700];
 
         // Word list for invaders - diverse vocabulary to avoid repetition
         // Categorized word lists - ALL REAL WORDS
@@ -1786,6 +2041,9 @@
                 game.highestScore = game.score;
             }
             
+            // Check if we hit a challenge milestone
+            checkChallengeMilestone();
+            
             // Animate score increase
             scoreValue.classList.remove('score-increase', 'score-decrease');
             void scoreValue.offsetWidth; // Force reflow
@@ -1798,6 +2056,17 @@
             setTimeout(() => {
                 scoreValue.classList.remove('score-increase');
             }, 500);
+        }
+
+        // Check if score reached a challenge milestone
+        function checkChallengeMilestone() {
+            for (let milestone of challengeMilestones) {
+                if (game.score >= milestone && !game.completedChallenges.includes(milestone)) {
+                    game.completedChallenges.push(milestone);
+                    startChallenge();
+                    break;
+                }
+            }
         }
 
         // Rotate rocket to face target
@@ -1994,6 +2263,12 @@
         document.addEventListener('keydown', (e) => {
             if (game.isGameOver) return;
             
+            // Handle challenge mode separately
+            if (game.isChallenge) {
+                handleChallengeInput(e);
+                return;
+            }
+            
             // Spacebar to pause/unpause
             if (e.key === ' ' || e.key === 'Spacebar') {
                 e.preventDefault();
@@ -2186,6 +2461,186 @@
             lastTime = timestamp;
             requestAnimationFrame(gameLoop);
         }
+
+        // Challenge system functions
+        function startChallenge() {
+            game.isChallenge = true;
+            game.isPaused = true;
+            game.challengeTimeLeft = 20;
+            game.currentInput = '';
+            
+            // Pick random sentence that hasn't been used
+            const unusedSentences = challengeSentences.filter((s, i) => 
+                !game.completedChallenges.includes(challengeMilestones[challengeSentences.indexOf(s)])
+            );
+            const randomSentence = challengeSentences[Math.floor(Math.random() * challengeSentences.length)];
+            
+            // Setup challenge screen
+            const challengeScreen = document.getElementById('challengeScreen');
+            const challengeSentence = document.getElementById('challengeSentence');
+            const challengeTimer = document.getElementById('challengeTimer');
+            const challengeInput = document.getElementById('challengeInput');
+            
+            // Wrap each character in a span
+            challengeSentence.innerHTML = randomSentence.split('').map(char => 
+                `<span class="char">${char}</span>`
+            ).join('');
+            
+            challengeTimer.textContent = `${game.challengeTimeLeft} Sec`;
+            challengeInput.textContent = '';
+            challengeScreen.classList.add('show');
+            
+            // Hide normal game keyboard during challenge
+            const normalKeyboard = document.getElementById('onScreenKeyboard');
+            normalKeyboard.classList.add('hide-for-challenge');
+            
+            // Start countdown
+            game.challengeTimer = setInterval(() => {
+                game.challengeTimeLeft--;
+                challengeTimer.textContent = `${game.challengeTimeLeft} Sec`;
+                
+                if (game.challengeTimeLeft <= 0) {
+                    failChallenge();
+                }
+            }, 1000);
+            
+            // Update current character highlight
+            updateChallengeProgress();
+        }
+
+        function updateChallengeProgress() {
+            const challengeSentence = document.getElementById('challengeSentence');
+            const chars = challengeSentence.querySelectorAll('.char');
+            const input = game.currentInput;
+            
+            chars.forEach((char, index) => {
+                char.classList.remove('correct', 'current');
+                if (index < input.length) {
+                    char.classList.add('correct');
+                } else if (index === input.length) {
+                    char.classList.add('current');
+                }
+            });
+        }
+
+        function completeChallenge() {
+            clearInterval(game.challengeTimer);
+            game.isChallenge = false;
+            game.isPaused = false;
+            game.currentInput = '';
+            
+            const challengeScreen = document.getElementById('challengeScreen');
+            challengeScreen.classList.remove('show');
+            
+            // Show normal keyboard again
+            const normalKeyboard = document.getElementById('onScreenKeyboard');
+            normalKeyboard.classList.remove('hide-for-challenge');
+            
+            // Bonus points for completing challenge
+            game.score += 50;
+            scoreValue.textContent = game.score;
+            
+            // Refocus input
+            const isMobile = window.matchMedia("(max-width: 768px)").matches;
+            if (isMobile) {
+                mobileInput.focus();
+            }
+        }
+
+        function failChallenge() {
+            clearInterval(game.challengeTimer);
+            game.isChallenge = false;
+            game.isPaused = false;
+            game.currentInput = '';
+            
+            const challengeScreen = document.getElementById('challengeScreen');
+            challengeScreen.classList.remove('show');
+            
+            // Show normal keyboard again
+            const normalKeyboard = document.getElementById('onScreenKeyboard');
+            normalKeyboard.classList.remove('hide-for-challenge');
+            
+            // Penalty for failing challenge
+            const penalty = 50;
+            game.score = Math.max(0, game.score - penalty);
+            scoreValue.textContent = game.score;
+            
+            // Check if game over
+            if (game.score === 0) {
+                gameOver();
+            }
+            
+            // Refocus input
+            const isMobile = window.matchMedia("(max-width: 768px)").matches;
+            if (isMobile) {
+                mobileInput.focus();
+            }
+        }
+
+        function handleChallengeInput(e) {
+            const challengeInput = document.getElementById('challengeInput');
+            const challengeSentenceEl = document.getElementById('challengeSentence');
+            const targetSentence = challengeSentenceEl.textContent;
+            
+            if (e.key === 'Backspace') {
+                game.currentInput = game.currentInput.slice(0, -1);
+            } else if (e.key.length === 1) {
+                // Only add character if it matches the next expected character (case-insensitive)
+                const nextChar = targetSentence[game.currentInput.length];
+                if (e.key.toLowerCase() === nextChar.toLowerCase()) {
+                    game.currentInput += nextChar; // Use the actual character from sentence (preserves case)
+                }
+            }
+            
+            // Update display
+            challengeInput.textContent = game.currentInput;
+            updateChallengeProgress();
+            
+            // Check if completed
+            if (game.currentInput === targetSentence) {
+                completeChallenge();
+            }
+        }
+
+        // Challenge keyboard event listeners (mobile/tablet)
+        const challengeKeys = document.querySelectorAll('.challenge-key');
+        challengeKeys.forEach(key => {
+            key.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (!game.isChallenge) return;
+                
+                const keyValue = key.getAttribute('data-key');
+                
+                if (keyValue === 'backspace') {
+                    handleChallengeInput({ key: 'Backspace' });
+                } else if (keyValue === ' ') {
+                    handleChallengeInput({ key: ' ' });
+                } else {
+                    handleChallengeInput({ key: keyValue });
+                }
+                
+                // Visual feedback
+                key.style.background = 'rgba(16, 185, 129, 0.5)';
+                setTimeout(() => {
+                    key.style.background = '';
+                }, 100);
+            });
+            
+            key.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!game.isChallenge) return;
+                
+                const keyValue = key.getAttribute('data-key');
+                
+                if (keyValue === 'backspace') {
+                    handleChallengeInput({ key: 'Backspace' });
+                } else if (keyValue === ' ') {
+                    handleChallengeInput({ key: ' ' });
+                } else {
+                    handleChallengeInput({ key: keyValue });
+                }
+            });
+        });
 
         // Game over
         function gameOver() {
