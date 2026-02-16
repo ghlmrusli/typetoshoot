@@ -1,0 +1,169 @@
+.waiting {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  background: radial-gradient(ellipse at center, #1a2942 0%, #0a1628 50%, #000814 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 20px;
+}
+
+.waiting::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, white, transparent),
+    radial-gradient(2px 2px at 60% 70%, white, transparent),
+    radial-gradient(1px 1px at 50% 50%, white, transparent);
+  background-size: 200% 200%, 300% 300%, 250% 250%;
+  background-repeat: repeat;
+  opacity: 0.6;
+  z-index: 0;
+}
+
+.content {
+  background: rgba(26, 41, 66, 0.6);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  max-width: 420px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.roomCodeLabel {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.roomCode {
+  font-size: 28px;
+  font-weight: bold;
+  color: #4ecdc4;
+  letter-spacing: 10px;
+  margin-bottom: 24px;
+  text-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+}
+
+.playerList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.player {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.playerReady {
+  border-color: rgba(78, 205, 196, 0.6);
+  background: rgba(78, 205, 196, 0.1);
+}
+
+.playerName {
+  font-size: 11px;
+  color: white;
+}
+
+.playerStatus {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.playerStatusReady {
+  color: #4ecdc4;
+}
+
+.waitingSlot {
+  background: rgba(255, 255, 255, 0.02);
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 9px;
+  text-align: center;
+}
+
+.readyBtn {
+  width: 100%;
+  padding: 14px 20px;
+  border: 2px solid rgba(78, 205, 196, 0.4);
+  border-radius: 12px;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  font-family: 'Press Start 2P', cursive;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(78, 205, 196, 0.15);
+  margin-bottom: 12px;
+}
+
+.readyBtn:hover {
+  background: rgba(78, 205, 196, 0.3);
+  border-color: rgba(78, 205, 196, 0.8);
+  transform: scale(1.02);
+}
+
+.readyBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.readyBtnActive {
+  background: rgba(78, 205, 196, 0.4);
+  border-color: #4ecdc4;
+}
+
+.leaveBtn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 9px;
+  font-family: 'Press Start 2P', cursive;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.leaveBtn:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.hint {
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 12px;
+}
+
+@media (max-width: 480px) {
+  .roomCode {
+    font-size: 24px;
+    letter-spacing: 8px;
+  }
+}

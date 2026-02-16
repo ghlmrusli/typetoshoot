@@ -1,0 +1,29 @@
+.gun {
+  font-size: 80px;
+  transform: rotate(-45deg);
+  transition: transform 0.3s ease;
+  position: relative;
+  z-index: 510;
+}
+
+.shoot {
+  transform: rotate(-45deg) scale(1.2);
+}
+
+.aiming {
+  transition: transform 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .gun {
+    font-size: 50px;
+    margin-bottom: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .gun {
+    font-size: 40px;
+    margin-bottom: 160px;
+  }
+}

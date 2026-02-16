@@ -1,0 +1,171 @@
+.challengeScreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2500;
+}
+
+.content {
+  text-align: center;
+  max-width: 90%;
+  padding: 40px;
+}
+
+.timer {
+  font-size: 28px;
+  color: #ff4757;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
+}
+
+.title {
+  font-size: 28px;
+  color: #ffd700;
+  margin-bottom: 30px;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.sentence {
+  font-size: 24px;
+  color: white;
+  margin-bottom: 20px;
+  line-height: 1.6;
+  letter-spacing: 2px;
+}
+
+.char {
+  position: relative;
+}
+
+.correct {
+  color: #10b981;
+}
+
+.current {
+  background: rgba(255, 215, 0, 0.3);
+  animation: blink 0.8s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.input {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.6);
+  min-height: 30px;
+  font-style: italic;
+  margin-bottom: 20px;
+}
+
+/* Challenge keyboard */
+.challengeKeyboard {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 20px;
+  }
+  .timer {
+    font-size: 20px;
+  }
+  .sentence {
+    font-size: 18px;
+    letter-spacing: 1px;
+  }
+  .input {
+    font-size: 14px;
+  }
+  .content {
+    padding: 20px;
+  }
+  .challengeKeyboard {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 3000;
+  }
+}
+
+.challengeRow {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+}
+
+.challengeKey {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  font-family: 'Press Start 2P', cursive;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  cursor: pointer;
+  transition: all 0.1s;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  border-right: 0.5px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+}
+
+.challengeKey:active {
+  background: rgba(16, 185, 129, 0.5);
+  transform: scale(0.95);
+}
+
+.challengeRow:first-child .challengeKey {
+  width: calc(100% / 10);
+}
+
+.challengeRow:nth-child(2) .challengeKey {
+  width: calc(100% / 9);
+}
+
+.challengeRow:nth-child(3) .challengeKey {
+  width: calc(100% / 8);
+}
+
+.challengeRow:nth-child(4) .challengeKey {
+  width: 100%;
+}
+
+.spacebar {
+  width: 100%;
+  font-size: 14px;
+}
+
+@media (max-width: 480px) {
+  .challengeKey {
+    height: 50px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 375px) {
+  .challengeKey {
+    height: 48px;
+    font-size: 14px;
+  }
+}

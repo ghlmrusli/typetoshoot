@@ -1,0 +1,92 @@
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 1000;
+  box-sizing: border-box;
+}
+
+.playerScore {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+}
+
+.playerScoreLeft {
+  justify-content: flex-start;
+}
+
+.playerScoreRight {
+  justify-content: flex-end;
+}
+
+.playerName {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.score {
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 8px;
+  min-width: 40px;
+  text-align: center;
+}
+
+.myScore {
+  border: 1px solid rgba(78, 205, 196, 0.4);
+}
+
+.timer {
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+  min-width: 60px;
+}
+
+.timerLow {
+  color: #ff4757;
+  animation: timerPulse 1s ease-in-out infinite;
+}
+
+@keyframes timerPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@media (max-width: 480px) {
+  .topbar {
+    height: 44px;
+    padding: 0 10px;
+  }
+  .score {
+    font-size: 13px;
+    padding: 3px 8px;
+  }
+  .timer {
+    font-size: 13px;
+  }
+  .playerName {
+    font-size: 8px;
+    max-width: 50px;
+  }
+}

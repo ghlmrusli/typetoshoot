@@ -1,0 +1,80 @@
+.inputDisplay {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.85);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 15px 30px;
+  font-size: 24px;
+  font-weight: bold;
+  min-width: 200px;
+  text-align: center;
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.2);
+  letter-spacing: 2px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+  opacity: 1;
+  visibility: visible;
+  z-index: 510;
+}
+
+.empty {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.active {
+  transform: translateX(-50%) scale(1);
+  min-width: 300px;
+}
+
+.typed {
+  color: white;
+  opacity: 1;
+}
+
+.untyped {
+  color: white;
+  opacity: 0.3;
+}
+
+.error {
+  animation: inputShake 0.3s;
+  border-color: rgba(255, 68, 68, 0.6);
+  background: rgba(255, 68, 68, 0.1);
+}
+
+@keyframes inputShake {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  25% { transform: translateX(calc(-50% - 5px)) scale(1); }
+  75% { transform: translateX(calc(-50% + 5px)) scale(1); }
+}
+
+@media (max-width: 768px) {
+  .inputDisplay {
+    font-size: 16px;
+    padding: 10px 20px;
+    min-width: 150px;
+    bottom: 15px;
+    display: none !important;
+  }
+  .active {
+    min-width: 220px;
+  }
+}
+
+@media (max-width: 480px) {
+  .inputDisplay {
+    font-size: 14px;
+    padding: 8px 16px;
+    min-width: 120px;
+    bottom: 10px;
+  }
+  .active {
+    min-width: 180px;
+  }
+}

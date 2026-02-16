@@ -1,0 +1,15 @@
+export const GAME_FIELD_WIDTH = 1000;
+export const GAME_FIELD_HEIGHT = 1000;
+export const TICK_RATE = 30; // Hz
+export const TICK_INTERVAL = 1000 / TICK_RATE; // ~33ms
+export const GAME_DURATION_SECONDS = 120; // 2 minutes
+export const FULL_STATE_INTERVAL = 5; // send full state every 5th tick
+export const MAX_INVADERS = 8;
+export const SPAWN_INTERVAL_MS = 2000;
+export const INVADER_SPEED = 1.5; // normalized units per tick
+export const INVADER_SPEED_VARIANCE = 0.4;
+export const INVADER_HORIZONTAL_SPEED = 0.3;
+export const UFO_CHANCE = 0.15;
+export const ROOM_CODE_LENGTH = 4;
+export const ROOM_CLEANUP_MS = 10 * 60 * 1000; // 10 minutes
+export const COUNTDOWN_SECONDS = 3;

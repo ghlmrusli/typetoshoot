@@ -1,0 +1,194 @@
+.timeSelection {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  background: radial-gradient(ellipse at center, #1a2942 0%, #0a1628 50%, #000814 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px;
+}
+
+.timeSelection::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, white, transparent),
+    radial-gradient(2px 2px at 60% 70%, white, transparent),
+    radial-gradient(1px 1px at 50% 50%, white, transparent),
+    radial-gradient(1px 1px at 80% 10%, white, transparent),
+    radial-gradient(2px 2px at 90% 60%, white, transparent),
+    radial-gradient(1px 1px at 33% 80%, white, transparent),
+    radial-gradient(1px 1px at 15% 55%, white, transparent),
+    radial-gradient(2px 2px at 70% 25%, white, transparent),
+    radial-gradient(1px 1px at 45% 15%, white, transparent),
+    radial-gradient(1px 1px at 25% 90%, white, transparent);
+  background-size: 200% 200%, 300% 300%, 250% 250%, 280% 280%, 220% 220%,
+                   260% 260%, 290% 290%, 240% 240%, 270% 270%, 230% 230%;
+  background-position: 0% 0%, 40% 60%, 50% 50%, 80% 10%, 90% 60%,
+                       33% 80%, 15% 55%, 70% 25%, 45% 15%, 25% 90%;
+  background-repeat: repeat;
+  opacity: 0.6;
+  z-index: 0;
+}
+
+.content {
+  background: rgba(26, 41, 66, 0.6);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 20px 24px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  max-width: 480px;
+  position: relative;
+  z-index: 1;
+}
+
+.rocketIcon {
+  font-size: 36px;
+  text-align: center;
+  margin-bottom: 20px;
+  animation: rotate360 8s linear infinite;
+}
+
+@keyframes rotate360 {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.title {
+  font-size: 16px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #ff8c00 0%, #ff0000 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.option {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.option:hover {
+  background: rgba(78, 205, 196, 0.2);
+  border-color: rgba(78, 205, 196, 0.6);
+  transform: scale(1.05);
+}
+
+.optionName {
+  font-size: 13px;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 5px;
+}
+
+.optionDesc {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 20px 24px;
+    max-width: 90%;
+  }
+  .rocketIcon {
+    font-size: 36px;
+  }
+  .title {
+    font-size: 16px;
+  }
+  .subtitle {
+    font-size: 9px;
+  }
+  .option {
+    padding: 12px 14px;
+  }
+  .optionName {
+    font-size: 13px;
+  }
+  .optionDesc {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 16px 20px;
+    max-width: 95%;
+  }
+  .rocketIcon {
+    font-size: 32px;
+  }
+  .title {
+    font-size: 16px;
+  }
+  .subtitle {
+    font-size: 8px;
+  }
+  .options {
+    gap: 10px;
+  }
+  .option {
+    padding: 12px 15px;
+  }
+  .optionName {
+    font-size: 14px;
+  }
+  .optionDesc {
+    font-size: 8px;
+  }
+}
+
+.multiplayerOption {
+  border-color: rgba(78, 205, 196, 0.3);
+  background: rgba(78, 205, 196, 0.08);
+}
+
+.multiplayerOption:hover {
+  background: rgba(78, 205, 196, 0.25);
+  border-color: rgba(78, 205, 196, 0.7);
+}
+
+@media (max-width: 375px) {
+  .title {
+    font-size: 14px;
+  }
+  .optionName {
+    font-size: 11px;
+  }
+}
