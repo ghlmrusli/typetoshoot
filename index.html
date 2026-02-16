@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Word Shooter</title>
+     <title>Word Shooter</title>
     
     <!-- Open Graph -->
     <meta property="og:title" content="🚀 Word Shooter">
@@ -19,7 +19,6 @@
     <meta name="twitter:image" content="https://wordshooter.vercel.app/og-image.png">
 
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -282,6 +281,60 @@
             display: none !important;
         }
         
+        /* Number keyboard for math mode */
+        #numberKeyboard {
+            display: none;
+            flex-direction: column;
+            gap: 0;
+            padding: 0;
+            background: transparent;
+            border-radius: 0;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 510;
+        }
+        
+        #numberKeyboard.show {
+            display: flex;
+        }
+        
+        #numberKeyboard .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+        }
+        
+        #numberKeyboard .key {
+            width: calc(100% / 5);  /* 5 keys per row */
+            height: 52px;
+            font-size: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-weight: bold;
+            font-family: 'Press Start 2P', cursive;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.1s;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            border-right: 0.5px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        #numberKeyboard .key:active {
+            background: rgba(16, 185, 129, 0.5);
+            transform: scale(0.95);
+        }
+        
         .keyboard-row {
             display: flex;
             justify-content: center;
@@ -331,6 +384,10 @@
                 display: flex;
                 gap: 0;  /* Remove gap between rows */
                 padding: 0;  /* Remove all padding - attach to bottom */
+            }
+            
+            #numberKeyboard {
+                /* Keep hidden by default, shown when math mode activates */
             }
             
             #mobileInput {
@@ -881,7 +938,7 @@
             width: 100%;
             height: 100%;
             height: 100dvh;
-            background: rgba(0, 0, 0, 0.7);  /* 70% black instead of 95% */
+            background: rgba(0, 0, 0, 0.5);  /* 50% black instead of 95% */
             display: none;
             align-items: center;
             justify-content: center;
@@ -940,11 +997,7 @@
         }
 
         #challengeInput {
-            font-size: 18px;
-            color: rgba(255, 255, 255, 0.6);
-            min-height: 30px;
-            font-style: italic;
-            margin-bottom: 20px;
+            display: none;
         }
 
         /* Challenge keyboard - hidden on desktop */
@@ -1076,6 +1129,50 @@
             -webkit-overflow-scrolling: touch;
             padding: 20px;
         }
+        
+        /* Floating words background */
+        #floatingWordsBackground {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .floating-word {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.3);
+            color: rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            font-family: 'Press Start 2P', cursive;
+            letter-spacing: 2px;
+            pointer-events: none;
+        }
+        
+        @keyframes float-across {
+            0% {
+                transform: translate(0, 0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.1;
+            }
+            90% {
+                opacity: 0.1;
+            }
+            100% {
+                transform: translate(var(--end-x), var(--end-y));
+                opacity: 0;
+            }
+        }
 
         #timeSelection::before {
             content: '';
@@ -1104,11 +1201,6 @@
             z-index: 0;
         }
 
-        #timeSelection > * {
-            position: relative;
-            z-index: 1;
-        }
-
         #timeSelection.hidden {
             display: none;
         }
@@ -1122,6 +1214,8 @@
             padding: 20px 24px;  /* Match tablet size */
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
             max-width: 480px;  /* Keep this for desktop max-width */
+            position: relative;
+            z-index: 10;
         }
 
         #rocketIcon {
@@ -1468,6 +1562,9 @@
             <div id="categoryDisplay">All</div>
         </div>
         <div id="rightControls">
+            <button id="autoTestToggle" style="background: #3b82f6; margin-right: 10px;" title="Toggle Auto-Test Mode">
+                <span style="font-size: 14px;">🤖 TEST</span>
+            </button>
             <button id="pauseBtn"><span class="material-symbols-outlined">pause</span></button>
             <button id="restartGameBtn"><span class="material-symbols-outlined">refresh</span></button>
         </div>
@@ -1516,10 +1613,31 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Number keyboard for math mode -->
+        <div id="numberKeyboard">
+            <div class="keyboard-row">
+                <button class="key" data-key="1">1</button>
+                <button class="key" data-key="2">2</button>
+                <button class="key" data-key="3">3</button>
+                <button class="key" data-key="4">4</button>
+                <button class="key" data-key="5">5</button>
+            </div>
+            <div class="keyboard-row">
+                <button class="key" data-key="6">6</button>
+                <button class="key" data-key="7">7</button>
+                <button class="key" data-key="8">8</button>
+                <button class="key" data-key="9">9</button>
+                <button class="key" data-key="0">0</button>
+            </div>
+        </div>
     </div>
 
     <!-- Time Selection Screen (outside gameContainer) -->
     <div id="timeSelection">
+        <!-- Floating words background -->
+        <div id="floatingWordsBackground"></div>
+        
         <div id="startScreenContent">
             <div id="rocketIcon">🚀</div>
             <h1 id="gameTitle">Word Shooter!</h1>
@@ -1636,7 +1754,10 @@
             isChallenge: false,
             challengeTimer: null,
             challengeTimeLeft: 20,
-            completedChallenges: []
+            completedChallenges: [],
+            isMathMode: false,
+            currentMathQuestion: null,
+            isLetterMode: false
         };
 
         // Challenge sentences for milestone scores
@@ -1650,6 +1771,43 @@
         ];
         
         const challengeMilestones = [200, 300, 400, 500, 600, 700];
+
+        // Letters for letter mode
+        const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
+
+        // Math mode functions
+        function generateMathQuestion() {
+            const operations = ['+', '-', '*'];
+            const operation = operations[Math.floor(Math.random() * operations.length)];
+            
+            let num1, num2, answer, displayOperation;
+            
+            switch(operation) {
+                case '+':
+                    num1 = Math.floor(Math.random() * 50) + 1;
+                    num2 = Math.floor(Math.random() * 50) + 1;
+                    answer = num1 + num2;
+                    displayOperation = '+';
+                    break;
+                case '-':
+                    num1 = Math.floor(Math.random() * 50) + 20;
+                    num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
+                    answer = num1 - num2;
+                    displayOperation = '-';
+                    break;
+                case '*':
+                    num1 = Math.floor(Math.random() * 12) + 1;
+                    num2 = Math.floor(Math.random() * 12) + 1;
+                    answer = num1 * num2;
+                    displayOperation = 'x';  // Use 'x' instead of '*' for display
+                    break;
+            }
+            
+            return {
+                question: `${num1}${displayOperation}${num2}`,
+                answer: answer.toString()
+            };
+        }
 
         // Word list for invaders - diverse vocabulary to avoid repetition
         // Categorized word lists - ALL REAL WORDS
@@ -1666,6 +1824,18 @@
                 'oak', 'pine', 'maple', 'birch', 'willow', 'palm', 'bamboo', 'cactus',
                 'fern', 'moss', 'ivy', 'grass', 'wheat', 'rice', 'corn', 'tomato',
                 'potato', 'carrot', 'lettuce', 'spinach', 'basil', 'mint', 'sage', 'thyme',
+                
+                // Common science words
+                'atom', 'cell', 'gene', 'solar', 'lunar', 'planet', 'orbit', 'energy',
+                'force', 'gravity', 'matter', 'quantum', 'carbon', 'oxygen', 'nitrogen', 'hydrogen',
+                'electron', 'proton', 'neutron', 'molecule', 'protein', 'enzyme', 'virus', 'bacteria',
+                'plasma', 'crystal', 'magma', 'lava', 'fossil', 'mineral', 'climate', 'ocean',
+                
+                // Common Gen Z words
+                'slay', 'vibe', 'fire', 'lit', 'cap', 'bet', 'flex', 'goat',
+                'yeet', 'mood', 'fam', 'bruh', 'bussin', 'drip', 'sus', 'valid',
+                'cringe', 'toxic', 'savage', 'extra', 'basic', 'salty', 'vibes', 'energy',
+                'squad', 'goals', 'icon', 'legend', 'queen', 'king', 'epic', 'dope',
                 
                 // General words
                 'house', 'tree', 'water', 'fire', 'earth', 'wind', 'stone', 'metal',
@@ -1732,6 +1902,22 @@
                 'algorithm', 'quantum', 'spectrum', 'frequency', 'wavelength', 'amplitude', 'resonance', 'diffraction',
                 'osmosis', 'diffusion', 'synthesis', 'analysis', 'hypothesis', 'theory', 'axiom', 'theorem',
                 'vector', 'matrix', 'exponential', 'logarithm', 'calculus', 'topology', 'entropy', 'equilibrium'
+            ],
+            
+            genz: [
+                // Gen Z slang and expressions
+                'slay', 'vibe', 'fire', 'lit', 'cap', 'bet', 'flex', 'goat',
+                'yeet', 'stan', 'simp', 'mood', 'fam', 'bruh', 'lowkey', 'highkey',
+                'bussin', 'sheesh', 'drip', 'sus', 'valid', 'rent', 'snatched', 'slaps',
+                'hits', 'ghosts', 'cringe', 'toxic', 'savage', 'extra', 'basic', 'salty',
+                'shook', 'woke', 'clout', 'hype', 'ghost', 'finsta', 'main', 'spam',
+                'tea', 'shade', 'glow', 'snack', 'ship', 'squad', 'goals', 'vibes',
+                'energy', 'aura', 'serves', 'period', 'icon', 'legend', 'queen', 'king',
+                'bop', 'slap', 'banger', 'tracks', 'tunes', 'jams', 'beats', 'bars',
+                'fire', 'flames', 'heat', 'hot', 'cold', 'fresh', 'clean', 'smooth',
+                'crisp', 'sharp', 'tight', 'solid', 'dope', 'sick', 'ill', 'wicked',
+                'crazy', 'insane', 'mental', 'wild', 'epic', 'mega', 'ultra', 'super',
+                'hyper', 'turbo', 'nitro', 'blast', 'boom', 'pow', 'bang', 'blast'
             ]
         };
         
@@ -1761,6 +1947,23 @@
         // Invader class
         class Invader {
             constructor() {
+                // Letter mode - single random letter
+                if (game.isLetterMode) {
+                    this.word = letters[Math.floor(Math.random() * letters.length)];
+                    this.emoji = '⭐';
+                    this.isLetter = true;
+                    this.isUfo = false;
+                    
+                    this.x = Math.random() * (window.innerWidth - 100);
+                    this.y = 0;
+                    // Slow speed like easy mode
+                    this.speedY = 0.3 * (0.8 + Math.random() * 0.4);
+                    this.speedX = (Math.random() - 0.5) * 0.3;
+                    this.element = this.createElement();
+                    this.isDying = false;
+                    return;
+                }
+                
                 // 1 in 5 chance to be a UFO
                 this.isUfo = Math.random() < 0.2;
                 
@@ -1804,9 +2007,31 @@
                 // Wrap each character in a span for progress effect
                 const wordSpans = this.word.split('').map(char => `<span class="char">${char}</span>`).join('');
                 
+                // Add rotation class for letter invaders
+                const emojiClass = this.isLetter ? 'invader-emoji letter-emoji' : 'invader-emoji';
+                
                 invader.innerHTML = `
                     <div class="invader-word">${wordSpans}</div>
-                    <div class="invader-emoji">${this.emoji}</div>
+                    <div class="${emojiClass}">${this.emoji}</div>
+                `;
+                invader.style.left = this.x + 'px';
+                invader.style.top = this.y + 'px';
+                gameContainer.appendChild(invader);
+                this.wordElement = invader.querySelector('.invader-word');
+                return invader;
+            }
+
+            createMathElement() {
+                const invader = document.createElement('div');
+                invader.className = 'invader';
+                
+                // Display the math question (e.g., "5 + 3")
+                const displayText = this.displayWord || this.word;
+                const wordSpans = displayText.split('').map(char => `<span class="char">${char}</span>`).join('');
+                
+                invader.innerHTML = `
+                    <div class="invader-word">${wordSpans}</div>
+                    <div class="invader-emoji">👽</div>
                 `;
                 invader.style.left = this.x + 'px';
                 invader.style.top = this.y + 'px';
@@ -1848,7 +2073,40 @@
 
             reachedBottomSide() {
                 if (!this.isDying) {
-                    // Deduct score based on word length (1 point per character)
+                    // In math mode, deduct 4 points and spawn new question
+                    if (game.isMathMode && this.isMathQuestion) {
+                        const penalty = 4;
+                        const oldScore = game.score;
+                        game.score = Math.max(0, game.score - penalty);
+                        
+                        // Animate score decrease
+                        scoreValue.classList.remove('score-increase', 'score-decrease');
+                        void scoreValue.offsetWidth; // Force reflow
+                        scoreValue.classList.add('score-decrease');
+                        
+                        // Animate the counter from old value to new value (counting down)
+                        animateValue(scoreValue, oldScore, game.score, 400);
+                        
+                        // Remove red color after animation
+                        setTimeout(() => {
+                            scoreValue.classList.remove('score-decrease');
+                        }, 500);
+                        
+                        // Check if game over
+                        if (game.score === 0) {
+                            gameOver();
+                            return;
+                        }
+                        
+                        this.die();
+                        // Spawn new math question after a short delay
+                        setTimeout(() => {
+                            spawnMathInvader();
+                        }, 500);
+                        return;
+                    }
+                    
+                    // Normal mode - deduct score based on word length (1 point per character)
                     const penalty = this.word.length;
                     const oldScore = game.score;
                     game.score = Math.max(0, game.score - penalty);
@@ -1987,12 +2245,55 @@
 
         // Spawn invader
         function spawnInvader() {
-            // Only spawn if under the max invader limit
+            // In math mode, only spawn if no active invaders
+            if (game.isMathMode) {
+                const activeInvaders = game.invaders.filter(z => !z.isDying).length;
+                if (activeInvaders === 0) {
+                    spawnMathInvader();
+                }
+                return;
+            }
+            
+            // Letter mode - higher frequency, more invaders allowed
+            if (game.isLetterMode) {
+                const activeInvaders = game.invaders.filter(z => !z.isDying).length;
+                const maxLetterInvaders = 10; // Much higher than normal
+                if (activeInvaders < maxLetterInvaders) {
+                    const invader = new Invader();
+                    game.invaders.push(invader);
+                }
+                return;
+            }
+            
+            // Normal mode - spawn if under the max invader limit
             const activeInvaders = game.invaders.filter(z => !z.isDying).length;
             if (activeInvaders < game.maxInvaders) {
                 const invader = new Invader();
                 game.invaders.push(invader);
             }
+        }
+
+        function spawnMathInvader() {
+            const mathQuestion = generateMathQuestion();
+            game.currentMathQuestion = mathQuestion;
+            
+            // Create a special invader with the math question
+            const invader = new Invader();
+            invader.word = mathQuestion.answer; // The answer is what we match
+            invader.displayWord = mathQuestion.question; // But we display the question
+            invader.isMathQuestion = true;
+            
+            // Position in center horizontally
+            invader.x = (window.innerWidth / 2) - 25;
+            
+            // Update the invader element to show the question
+            const existingElement = document.querySelector('.invader');
+            if (existingElement) {
+                existingElement.remove();
+            }
+            
+            invader.element = invader.createMathElement();
+            game.invaders.push(invader);
         }
 
         // Shoot gun
@@ -2031,8 +2332,17 @@
             window.requestAnimationFrame(step);
         }
 
-        function updateScore(word) {
-            const points = word.length;
+        function updateScore(word, invader = null) {
+            // Scoring: Math = 4 points, Letters = 1 point, Words = length
+            let points;
+            if (invader && invader.isMathQuestion) {
+                points = 4;
+            } else if (invader && invader.isLetter) {
+                points = 1;
+            } else {
+                points = word.length;
+            }
+            
             const oldScore = game.score;
             game.score += points;
             
@@ -2060,6 +2370,50 @@
 
         // Check if score reached a challenge milestone
         function checkChallengeMilestone() {
+            const isMobile = window.matchMedia("(max-width: 768px)").matches;
+            
+            // Check for letter mode at 900
+            if (game.score >= 900 && !game.isLetterMode && !game.isMathMode) {
+                game.isLetterMode = true;
+                
+                // Switch back to letter keyboard on mobile if it was number keyboard
+                if (isMobile) {
+                    document.getElementById('numberKeyboard').classList.remove('show');
+                    document.getElementById('onScreenKeyboard').style.display = 'flex';
+                }
+                
+                // Clear existing invaders
+                game.invaders.forEach(inv => {
+                    if (!inv.isDying) {
+                        inv.element.remove();
+                    }
+                });
+                game.invaders = [];
+                return;
+            }
+            
+            // Check for math mode at 800
+            if (game.score >= 800 && !game.isMathMode) {
+                game.isMathMode = true;
+                
+                // Switch keyboards on mobile
+                if (isMobile) {
+                    document.getElementById('onScreenKeyboard').style.display = 'none';
+                    document.getElementById('numberKeyboard').classList.add('show');
+                }
+                
+                // Clear existing word invaders and spawn first math question
+                game.invaders.forEach(inv => {
+                    if (!inv.isDying) {
+                        inv.element.remove();
+                    }
+                });
+                game.invaders = [];
+                spawnMathInvader();
+                return;
+            }
+            
+            // Check for challenge milestones
             for (let milestone of challengeMilestones) {
                 if (game.score >= milestone && !game.completedChallenges.includes(milestone)) {
                     game.completedChallenges.push(milestone);
@@ -2292,7 +2646,7 @@
                 updateWordProgress();
                 updateInputDisplay();
                 updateKeyboardHighlight();
-            } else if (e.key.length === 1 && /[a-z]/i.test(e.key)) {
+            } else if (e.key.length === 1 && /[a-z0-9]/i.test(e.key)) {
                 const newInput = game.currentInput + e.key.toLowerCase();
                 
                 // Check if any invader word starts with this input
@@ -2350,7 +2704,15 @@
                         }, 500);
                     }, travelTime);
                     
-                    updateScore(matchedInvader.word);
+                    updateScore(matchedInvader.word, matchedInvader);
+                    
+                    // In math mode, spawn new question after answering correctly
+                    if (game.isMathMode && matchedInvader.isMathQuestion) {
+                        setTimeout(() => {
+                            spawnMathInvader();
+                        }, travelTime + 500);
+                    }
+                    
                     game.currentInput = '';
                     mobileInput.value = '';
                     game.targetInvader = null;
@@ -2409,8 +2771,9 @@
             if (!game.isPaused) {
                 const deltaTime = timestamp - lastTime;
 
-                // Spawn invaders
-                if (timestamp - game.lastSpawn > game.spawnInterval) {
+                // Spawn invaders - faster in letter mode
+                const spawnInterval = game.isLetterMode ? 800 : game.spawnInterval; // Much faster for letters
+                if (timestamp - game.lastSpawn > spawnInterval) {
                     spawnInvader();
                     game.lastSpawn = timestamp;
                 }
@@ -2532,16 +2895,33 @@
             const challengeScreen = document.getElementById('challengeScreen');
             challengeScreen.classList.remove('show');
             
-            // Show normal keyboard again
-            const normalKeyboard = document.getElementById('onScreenKeyboard');
-            normalKeyboard.classList.remove('hide-for-challenge');
+            // Restore correct keyboard based on current mode
+            const isMobile = window.matchMedia("(max-width: 768px)").matches;
+            if (isMobile) {
+                const normalKeyboard = document.getElementById('onScreenKeyboard');
+                const numberKeyboard = document.getElementById('numberKeyboard');
+                
+                if (game.isMathMode) {
+                    // Math mode - show number keyboard
+                    normalKeyboard.style.display = 'none';
+                    numberKeyboard.classList.add('show');
+                } else {
+                    // Word/Letter mode - show letter keyboard
+                    normalKeyboard.classList.remove('hide-for-challenge');
+                    normalKeyboard.style.display = 'flex';
+                    numberKeyboard.classList.remove('show');
+                }
+            } else {
+                // Desktop - just unhide
+                const normalKeyboard = document.getElementById('onScreenKeyboard');
+                normalKeyboard.classList.remove('hide-for-challenge');
+            }
             
             // Bonus points for completing challenge
             game.score += 50;
             scoreValue.textContent = game.score;
             
             // Refocus input
-            const isMobile = window.matchMedia("(max-width: 768px)").matches;
             if (isMobile) {
                 mobileInput.focus();
             }
@@ -2556,9 +2936,27 @@
             const challengeScreen = document.getElementById('challengeScreen');
             challengeScreen.classList.remove('show');
             
-            // Show normal keyboard again
-            const normalKeyboard = document.getElementById('onScreenKeyboard');
-            normalKeyboard.classList.remove('hide-for-challenge');
+            // Restore correct keyboard based on current mode
+            const isMobile = window.matchMedia("(max-width: 768px)").matches;
+            if (isMobile) {
+                const normalKeyboard = document.getElementById('onScreenKeyboard');
+                const numberKeyboard = document.getElementById('numberKeyboard');
+                
+                if (game.isMathMode) {
+                    // Math mode - show number keyboard
+                    normalKeyboard.style.display = 'none';
+                    numberKeyboard.classList.add('show');
+                } else {
+                    // Word/Letter mode - show letter keyboard
+                    normalKeyboard.classList.remove('hide-for-challenge');
+                    normalKeyboard.style.display = 'flex';
+                    numberKeyboard.classList.remove('show');
+                }
+            } else {
+                // Desktop - just unhide
+                const normalKeyboard = document.getElementById('onScreenKeyboard');
+                normalKeyboard.classList.remove('hide-for-challenge');
+            }
             
             // Penalty for failing challenge
             const penalty = 50;
@@ -2571,7 +2969,6 @@
             }
             
             // Refocus input
-            const isMobile = window.matchMedia("(max-width: 768px)").matches;
             if (isMobile) {
                 mobileInput.focus();
             }
@@ -2654,6 +3051,22 @@
             // Clear invaders and bullets
             game.invaders.forEach(z => z.element.remove());
             game.bullets.forEach(b => b.remove());
+            
+            // Reset all mode flags
+            game.isMathMode = false;
+            game.isLetterMode = false;
+            game.completedChallenges = [];
+            
+            // Reset keyboards to default (word keyboard on mobile)
+            const isMobile = window.matchMedia("(max-width: 768px)").matches;
+            if (isMobile) {
+                const normalKeyboard = document.getElementById('onScreenKeyboard');
+                const numberKeyboard = document.getElementById('numberKeyboard');
+                
+                normalKeyboard.style.display = 'flex';
+                normalKeyboard.classList.remove('hide-for-challenge');
+                numberKeyboard.classList.remove('show');
+            }
             
             // Hide game container and show time selection screen
             gameContainer.classList.add('hidden');
@@ -2850,7 +3263,7 @@
         
         // Category cycling
         categoryDisplay.addEventListener('click', () => {
-            const categoryOrder = ['all', 'animals', 'plants', 'science'];
+            const categoryOrder = ['all', 'animals', 'plants', 'science', 'genz'];
             const currentIndex = categoryOrder.indexOf(currentCategory);
             const nextIndex = (currentIndex + 1) % categoryOrder.length;
             currentCategory = categoryOrder[nextIndex];
@@ -2862,7 +3275,8 @@
                 'all': 'All',
                 'animals': 'Animals',
                 'plants': 'Plants',
-                'science': 'Science'
+                'science': 'Science',
+                'genz': 'Gen Z'
             };
             categoryDisplay.textContent = categoryNames[currentCategory];
         });
@@ -3069,7 +3483,15 @@
                         }, 500);
                     }, travelTime);
                     
-                    updateScore(matchedInvader.word);
+                    updateScore(matchedInvader.word, matchedInvader);
+                    
+                    // In math mode, spawn new question after answering correctly
+                    if (game.isMathMode && matchedInvader.isMathQuestion) {
+                        setTimeout(() => {
+                            spawnMathInvader();
+                        }, travelTime + 500);
+                    }
+                    
                     game.currentInput = '';
                     mobileInput.value = '';
                     game.targetInvader = null;
@@ -3114,6 +3536,210 @@
                 updateKeyboardHighlight();
             }
         }
+
+        // Auto-Test Mode
+        let autoTestEnabled = false;
+        let autoTestInterval = null;
+        let speedRoundChecker = null;
+        let lastScore = 0;
+        
+        const autoTestToggle = document.getElementById('autoTestToggle');
+        
+        autoTestToggle.addEventListener('click', () => {
+            autoTestEnabled = !autoTestEnabled;
+            
+            if (autoTestEnabled) {
+                autoTestToggle.style.background = '#10b981';
+                autoTestToggle.innerHTML = '<span style="font-size: 14px;">🤖 ON</span>';
+                startAutoTest();
+            } else {
+                autoTestToggle.style.background = '#3b82f6';
+                autoTestToggle.innerHTML = '<span style="font-size: 14px;">🤖 TEST</span>';
+                stopAutoTest();
+            }
+        });
+        
+        function startAutoTest() {
+            console.log('🤖 Auto-Test Mode ENABLED');
+            console.log('📋 Test Plan:');
+            console.log('  0-199: Normal Mode (words)');
+            console.log('  200: Speed Round 1');
+            console.log('  300: Speed Round 2');
+            console.log('  400: Speed Round 3');
+            console.log('  500: Speed Round 4');
+            console.log('  600: Speed Round 5');
+            console.log('  700: Speed Round 6');
+            console.log('  800+: Math Mode');
+            console.log('  900+: Letter Mode');
+            
+            // Auto-start game if not started
+            if (!game.isGameOver && gameContainer.classList.contains('hidden')) {
+                startGame('easy');
+            }
+            
+            // Monitor score changes and log mode transitions
+            speedRoundChecker = setInterval(() => {
+                if (game.score !== lastScore) {
+                    lastScore = game.score;
+                    
+                    // Log mode transitions
+                    if (game.score === 200 || game.score === 300 || game.score === 400 || 
+                        game.score === 500 || game.score === 600 || game.score === 700) {
+                        console.log(`🎯 Score ${game.score} - Speed Round triggered!`);
+                    } else if (game.score === 800) {
+                        console.log('🧮 Score 800 - Math Mode activated!');
+                    } else if (game.score === 900) {
+                        console.log('⭐ Score 900 - Letter Mode activated!');
+                    }
+                }
+                
+                // Auto-complete Speed Rounds
+                if (game.isChallenge) {
+                    const challengeSentence = document.getElementById('challengeSentence');
+                    if (challengeSentence) {
+                        const targetSentence = challengeSentence.textContent;
+                        const remaining = targetSentence.slice(game.currentInput.length);
+                        
+                        if (remaining.length > 0) {
+                            const char = remaining[0];
+                            const event = new KeyboardEvent('keydown', {
+                                key: char,
+                                code: char === ' ' ? 'Space' : `Key${char.toUpperCase()}`,
+                                bubbles: true
+                            });
+                            document.dispatchEvent(event);
+                        }
+                    }
+                }
+            }, 100);
+            
+            // Auto-play the game
+            autoTestInterval = setInterval(() => {
+                if (game.isGameOver) {
+                    console.log('❌ Game Over - Auto-test completed');
+                    stopAutoTest();
+                    return;
+                }
+                
+                if (game.isPaused || game.isChallenge) return;
+                
+                // Find a target invader
+                const activeInvaders = game.invaders.filter(inv => !inv.isDying);
+                
+                if (activeInvaders.length > 0 && game.currentInput === '') {
+                    // Pick the invader closest to the bottom (most urgent)
+                    const target = activeInvaders.reduce((lowest, inv) => 
+                        inv.y > lowest.y ? inv : lowest
+                    );
+                    
+                    // Type the word/answer automatically
+                    const word = target.word;
+                    
+                    console.log(`🎯 Targeting: "${word}" (${target.emoji})`);
+                    
+                    // Type all characters quickly
+                    for (let i = 0; i < word.length; i++) {
+                        setTimeout(() => {
+                            const char = word[i];
+                            const event = new KeyboardEvent('keydown', {
+                                key: char,
+                                code: char === ' ' ? 'Space' : `Key${char.toUpperCase()}`,
+                                bubbles: true
+                            });
+                            document.dispatchEvent(event);
+                        }, i * 30); // 30ms between characters
+                    }
+                }
+            }, 200); // Check for new targets every 200ms
+        }
+        
+        function stopAutoTest() {
+            console.log('🤖 Auto-Test Mode DISABLED');
+            if (autoTestInterval) {
+                clearInterval(autoTestInterval);
+                autoTestInterval = null;
+            }
+            if (speedRoundChecker) {
+                clearInterval(speedRoundChecker);
+                speedRoundChecker = null;
+            }
+            lastScore = 0;
+        }
+
+        // Floating words background animation
+        function createFloatingWords() {
+            const container = document.getElementById('floatingWordsBackground');
+            if (!container) return;
+            
+            // Use same word lists as the game
+            const floatingWords = [
+                'cat', 'dog', 'lion', 'tiger', 'bear', 'wolf', 'fox', 'eagle',
+                'tree', 'rose', 'lily', 'oak', 'pine', 'fern', 'moss', 'vine',
+                'atom', 'star', 'moon', 'solar', 'orbit', 'planet', 'galaxy', 'nebula',
+                'code', 'type', 'shoot', 'game', 'play', 'win', 'score', 'fast'
+            ];
+            
+            // Spawn words continuously like invaders in the game
+            setInterval(() => {
+                if (!document.getElementById('timeSelection') || 
+                    document.getElementById('timeSelection').classList.contains('hidden')) {
+                    return;
+                }
+                
+                const word = floatingWords[Math.floor(Math.random() * floatingWords.length)];
+                const wordEl = document.createElement('div');
+                wordEl.className = 'floating-word';
+                wordEl.textContent = word;
+                
+                // Random horizontal position (like invaders)
+                const startX = Math.random() * (window.innerWidth - 200);
+                wordEl.style.left = startX + 'px';
+                wordEl.style.top = '-60px';
+                
+                // Movement speeds matching game invaders (0.8-1.2 speed range for medium difficulty)
+                const speedY = 0.8 * (0.8 + Math.random() * 0.4); // pixels per frame
+                const speedX = (Math.random() - 0.5) * 0.3; // slight horizontal drift
+                
+                let posY = -60;
+                let posX = startX;
+                
+                container.appendChild(wordEl);
+                
+                // Animate like game invaders using requestAnimationFrame
+                function animate() {
+                    if (!document.getElementById('timeSelection') || 
+                        document.getElementById('timeSelection').classList.contains('hidden')) {
+                        wordEl.remove();
+                        return;
+                    }
+                    
+                    posY += speedY;
+                    posX += speedX;
+                    
+                    // Bounce off edges like invaders
+                    if (posX < 0 || posX > window.innerWidth - 200) {
+                        posX = Math.max(0, Math.min(posX, window.innerWidth - 200));
+                    }
+                    
+                    wordEl.style.top = posY + 'px';
+                    wordEl.style.left = posX + 'px';
+                    
+                    // Remove when off screen
+                    if (posY > window.innerHeight) {
+                        wordEl.remove();
+                        return;
+                    }
+                    
+                    requestAnimationFrame(animate);
+                }
+                
+                requestAnimationFrame(animate);
+                
+            }, 2000); // Spawn every 2 seconds like game spawn rate
+        }
+        
+        // Start floating words when page loads
+        createFloatingWords();
 
         // Initialize game - show start screen
         // Game starts when user clicks start button
