@@ -3817,21 +3817,23 @@
             // Clear canvas (transparent background)
             ctx.clearRect(0, 0, width, height);
             
-            // Use actual history or generate sample data
-            let wpmData = game.wpmHistory.length > 0 ? game.wpmHistory : [];
-            let accuracyData = game.accuracyHistory.length > 0 ? game.accuracyHistory : [];
+            // Use actual performance history only
+            const wpmData = game.wpmHistory;
+            const accuracyData = game.accuracyHistory;
             
-            if (wpmData.length < 2) {
-                // Generate sample data for preview
-                const result = generateSampleDualData();
-                wpmData = result.wpm;
-                accuracyData = result.accuracy;
+            // If we don't have enough real data points yet, skip drawing
+            if (wpmData.length < 2 || accuracyData.length < 2) {
+                return;
             }
             
             const points = wpmData.length;
             const padding = 0;
             const graphWidth = width - padding * 2;
             const graphHeight = height - 40; // Bottom padding for labels
+            
+            // Normalize WPM against a realistic max ceiling so the line
+            // uses the full vertical space meaningfully (e.g. 80 WPM)
+            const MAX_WPM = 80;
             
             // Create paths for both lines
             const accuracyPath = [];
@@ -3844,7 +3846,7 @@
                 const accY = height - (accValue * graphHeight);
                 accuracyPath.push({ x, y: accY });
                 
-                const wpmValue = wpmData[i] / 100;
+                const wpmValue = Math.min(wpmData[i] / MAX_WPM, 1);
                 const wpmY = height - (wpmValue * graphHeight);
                 wpmPath.push({ x, y: wpmY });
             }
@@ -3944,34 +3946,6 @@
             ctx.stroke();
         }
         
-        function generateSampleDualData() {
-            const points = 20;
-            const wpm = [];
-            const accuracy = [];
-            
-            // Calculate actual final WPM and accuracy
-            const totalTimeMinutes = (Date.now() - game.startTime) / 60000;
-            const finalWpm = Math.round((game.correctCharacters / 5) / totalTimeMinutes);
-            const totalAttempts = game.correctCharacters + game.incorrectAttempts;
-            const finalAccuracy = totalAttempts > 0 ? Math.round((game.correctCharacters / totalAttempts) * 100) : 100;
-            
-            for (let i = 0; i < points; i++) {
-                const progress = i / (points - 1);
-                
-                // WPM starts lower and increases with variance
-                const wpmVariance = (Math.random() - 0.5) * 8;
-                const wpmValue = Math.max(10, finalWpm * (0.5 + progress * 0.5) + wpmVariance);
-                wpm.push(Math.round(wpmValue));
-                
-                // Accuracy starts higher and stabilizes
-                const accuracyVariance = (Math.random() - 0.5) * 5;
-                const accuracyValue = Math.max(60, Math.min(100, finalAccuracy * (0.85 + progress * 0.15) + accuracyVariance));
-                accuracy.push(Math.round(accuracyValue));
-            }
-            
-            return { wpm, accuracy };
-        }
-
         function togglePause() {
             game.isPaused = !game.isPaused;
             const icon = pauseBtn.querySelector('.material-symbols-outlined');
