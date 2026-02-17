@@ -2188,6 +2188,7 @@
             correctCharacters: 0,
             incorrectAttempts: 0,
             missedWords: 0,
+            consecutiveMisses: 0,
             fastestWordTime: null,
             wordStartTime: null,
             // Performance history for graph (track WPM and accuracy over time)
@@ -2520,6 +2521,10 @@
 
             reachedBottomSide() {
                 if (!this.isDying) {
+                    // Track missed word/math/letter when reaching the bottom side
+                    game.missedWords++;
+                    game.consecutiveMisses++;
+                    
                     // In math mode, deduct 4 points and spawn new question
                     if (game.isMathMode && this.isMathQuestion) {
                         const penalty = 4;
@@ -2540,7 +2545,7 @@
                         }, 500);
                         
                         // Check if game over
-                        if (game.score === 0) {
+                        if (game.score === 0 || game.consecutiveMisses >= 10) {
                             gameOver();
                             return;
                         }
@@ -2572,8 +2577,9 @@
                     }, 500);
                     
                     // Check if game over
-                    if (game.score === 0) {
+                    if (game.score === 0 || game.consecutiveMisses >= 10) {
                         gameOver();
+                        return;
                     }
                     
                     this.die();
@@ -2793,6 +2799,8 @@
             
             const oldScore = game.score;
             game.score += points;
+            // Reset consecutive misses on a successful hit
+            game.consecutiveMisses = 0;
             
             // Update highest score if current score exceeds it
             if (game.score > game.highestScore) {
@@ -3262,10 +3270,6 @@
                 game.invaders = game.invaders.filter(invader => {
                     invader.update();
                     if (invader.y >= window.innerHeight + 100) {
-                        // Track missed word
-                        if (!invader.isDying) {
-                            game.missedWords++;
-                        }
                         return false;
                     }
                     return true;
@@ -3528,9 +3532,9 @@
 
         // Game over
         function gameOver() {
-            game.isGameOver = true;
-            finalScoreElement.textContent = `Highest Score: ${game.highestScore}`;
-            gameOverScreen.classList.add('show');
+            // Use the celebration screen for all game-over scenarios
+            if (game.isGameOver) return;
+            showCelebration();
         }
 
         // Restart game
@@ -3614,6 +3618,7 @@
             game.correctCharacters = 0;
             game.incorrectAttempts = 0;
             game.missedWords = 0;
+            game.consecutiveMisses = 0;
             game.fastestWordTime = null;
             game.wordStartTime = null;
             game.wpmHistory = [];
