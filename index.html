@@ -966,11 +966,13 @@
             background: rgba(30, 45, 70, 0.98);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.15);
-            border-radius: 19px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
             width: 300px;
-            height: 424px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            /* Let the card hug its contents so graph + labels are never clipped */
+            height: auto;
+            /* Softer, subtler drop shadow */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -1027,9 +1029,13 @@
 
         .header-value {
             font-size: 36px;
-            color: #ffd700;
             font-family: 'Press Start 2P', cursive;
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            /* Orange-to-red gradient similar to game title */
+            background: linear-gradient(135deg, #ff8c00 0%, #ff0000 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(255, 140, 0, 0.5);
             line-height: 1;
         }
 
@@ -1067,6 +1073,12 @@
             font-family: 'Press Start 2P', cursive;
             text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
             line-height: 1;
+        }
+
+        /* Match accuracy color with the graph (green) */
+        #celebrationAccuracy {
+            color: #10b981;
+            text-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
         }
 
         #celebrationBody #rocketIcon {
@@ -1122,7 +1134,8 @@
 
         #performanceGraph {
             width: 100%;
-            height: 150px;
+            /* Slightly reduced height so labels + graph fit comfortably */
+            height: 135px;
             display: block;
         }
 
@@ -1130,7 +1143,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 4px 0px 0 0px;
+            /* Extra padding-top to separate graph from time labels */
+            padding: 8px 0px 0 0px;
         }
 
         .graph-time-label {
@@ -1148,7 +1162,7 @@
         @media (max-width: 768px) {
             #celebrationCard {
                 width: 280px;
-                height: 404px;
+                height: auto;
             }
 
             .header-label,
@@ -1175,7 +1189,8 @@
             }
 
             #performanceGraph {
-                height: 130px;
+                /* Match desktop reduction (~10%) for mobile */
+                height: 115px;
             }
 
             .bottom-stat-label,
@@ -3290,6 +3305,27 @@
                     rotateRocketToTarget(game.targetInvader);
                 }
 
+                // Record performance history periodically for the celebration graph
+                if (game.startTime && game.lastPerformanceCheck) {
+                    const now = Date.now();
+                    const intervalMs = 2000; // sample every 2 seconds
+                    if (now - game.lastPerformanceCheck >= intervalMs) {
+                        const totalTimeMinutes = (now - game.startTime) / 60000;
+                        const totalAttempts = game.correctCharacters + game.incorrectAttempts;
+
+                        const currentWpm = totalTimeMinutes > 0
+                            ? Math.round((game.correctCharacters / 5) / totalTimeMinutes)
+                            : 0;
+                        const currentAccuracy = totalAttempts > 0
+                            ? Math.round((game.correctCharacters / totalAttempts) * 100)
+                            : 0;
+
+                        game.wpmHistory.push(currentWpm);
+                        game.accuracyHistory.push(currentAccuracy);
+                        game.lastPerformanceCheck = now;
+                    }
+                }
+
                 // Progressive difficulty - gradually increase speed and spawn rate based on score
                 if (game.score > 0 && game.score % 50 === 0) {
                     // Gradually increase speed (cap based on difficulty)
@@ -3710,7 +3746,7 @@
             
             // Accuracy calculation
             const totalAttempts = game.correctCharacters + game.incorrectAttempts;
-            const accuracy = totalAttempts > 0 ? Math.round((game.correctCharacters / totalAttempts) * 100) : 100;
+            const accuracy = totalAttempts > 0 ? Math.round((game.correctCharacters / totalAttempts) * 100) : 0;
             
             // Determine player rank based on WPM and Accuracy
             let rank = 'NOOB';
@@ -3817,13 +3853,24 @@
             // Clear canvas (transparent background)
             ctx.clearRect(0, 0, width, height);
             
-            // Use actual performance history only
-            const wpmData = game.wpmHistory;
-            const accuracyData = game.accuracyHistory;
+            // Start from actual performance history
+            let wpmData = game.wpmHistory.slice();
+            let accuracyData = game.accuracyHistory.slice();
             
-            // If we don't have enough real data points yet, skip drawing
+            // If we don't have enough real data points yet, synthesize a flat line
+            // from the final real WPM and accuracy so the graph is never empty.
             if (wpmData.length < 2 || accuracyData.length < 2) {
-                return;
+                const totalTimeMinutes = (Date.now() - game.startTime) / 60000;
+                const finalWpm = totalTimeMinutes > 0
+                    ? Math.round((game.correctCharacters / 5) / totalTimeMinutes)
+                    : 0;
+                const totalAttempts = game.correctCharacters + game.incorrectAttempts;
+                const finalAccuracy = totalAttempts > 0
+                    ? Math.round((game.correctCharacters / totalAttempts) * 100)
+                    : 0;
+                
+                wpmData = [finalWpm, finalWpm];
+                accuracyData = [finalAccuracy, finalAccuracy];
             }
             
             const points = wpmData.length;
@@ -3839,14 +3886,24 @@
             const accuracyPath = [];
             const wpmPath = [];
             
+            // Helper to make WPM ups/downs more dramatic around the midline.
+            // v in [0,1] -> 0.5 + (v-0.5)*2 (clamped), which doubles distance
+            // from 0.5 so highs are higher and lows are lower visually.
+            const exaggerateWpm = (v) => {
+                const exaggerated = 0.5 + (v - 0.5) * 2;
+                return Math.max(0, Math.min(1, exaggerated));
+            };
+            
             for (let i = 0; i < points; i++) {
                 const x = padding + (i / (points - 1)) * graphWidth;
                 
-                const accValue = accuracyData[i] / 100;
+                // Keep accuracy linear so small changes remain visible
+                let accValue = accuracyData[i] / 100;
                 const accY = height - (accValue * graphHeight);
                 accuracyPath.push({ x, y: accY });
                 
-                const wpmValue = Math.min(wpmData[i] / MAX_WPM, 1);
+                let wpmValue = Math.min(wpmData[i] / MAX_WPM, 1);
+                wpmValue = exaggerateWpm(wpmValue);
                 const wpmY = height - (wpmValue * graphHeight);
                 wpmPath.push({ x, y: wpmY });
             }
@@ -3863,11 +3920,11 @@
                 // Clear canvas
                 ctx.clearRect(0, 0, width, height);
                 
-                // Draw Accuracy (green) - back layer
+                // Draw Accuracy (green) - back layer (area + line)
                 drawAnimatedPath(ctx, accuracyPath, progress, '#10b981', 'rgba(16, 185, 129, 0.7)', 'rgba(16, 185, 129, 0.2)', height);
                 
-                // Draw WPM (yellow) - front layer
-                drawAnimatedPath(ctx, wpmPath, progress, '#FFD400', 'rgba(255, 212, 0, 0.7)', 'rgba(255, 212, 0, 0.2)', height);
+                // Draw WPM (yellow) - front layer (area + bold line), similar to accuracy
+                drawAnimatedPath(ctx, wpmPath, progress, '#FFD400', 'rgba(255, 212, 0, 0.5)', 'rgba(255, 212, 0, 0.1)', height);
                 
                 // Continue animation if not complete
                 if (progress < 1) {
@@ -3945,6 +4002,7 @@
             ctx.lineJoin = 'round';
             ctx.stroke();
         }
+
         
         function togglePause() {
             game.isPaused = !game.isPaused;
