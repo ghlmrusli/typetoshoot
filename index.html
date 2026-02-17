@@ -3720,6 +3720,16 @@
             // Desktop will use document keydown listener directly
             const isMobile = window.matchMedia("(max-width: 768px)").matches;
             if (isMobile) {
+                // Always clear any inline display styles left over from a previous session
+                // (math mode, celebration hide, or challenge hide all set style.display directly
+                // which overrides the CSS media query and causes the keyboard to stay invisible).
+                const normalKeyboard = document.getElementById('onScreenKeyboard');
+                const numberKeyboard = document.getElementById('numberKeyboard');
+                normalKeyboard.style.display = '';       // remove inline → CSS media query shows it
+                normalKeyboard.classList.remove('hide-for-challenge');
+                numberKeyboard.style.display = '';       // remove inline → stays hidden via CSS
+                numberKeyboard.classList.remove('show'); // only re-added when math mode activates
+
                 // Mobile - use the hidden input to capture keyboard
                 requestAnimationFrame(() => {
                     mobileInput.focus();
@@ -4385,7 +4395,12 @@ Play now at: ${window.location.href}`;
                     inv => !inv.isDying && inv.word.startsWith(newInput)
                 );
                 
+                // Track every character attempt
+                game.totalCharactersTyped++;
+                
                 if (!hasMatch) {
+                    // Track incorrect attempt
+                    game.incorrectAttempts++;
                     // Play error sound and reset input completely
                     playErrorSound();
                     game.currentInput = '';
@@ -4405,6 +4420,14 @@ Play now at: ${window.location.href}`;
                     return;
                 }
                 
+                // Track correct character
+                game.correctCharacters++;
+                
+                // Start word timer if this is the first character of a new word
+                if (game.currentInput === '' || !game.wordStartTime) {
+                    game.wordStartTime = Date.now();
+                }
+                
                 game.currentInput = newInput;
                 mobileInput.value = newInput;
                 
@@ -4414,6 +4437,15 @@ Play now at: ${window.location.href}`;
                 );
                 
                 if (matchedInvader) {
+                    // Track fastest word time
+                    if (game.wordStartTime) {
+                        const wordTime = Date.now() - game.wordStartTime;
+                        if (!game.fastestWordTime || wordTime < game.fastestWordTime) {
+                            game.fastestWordTime = wordTime;
+                        }
+                        game.wordStartTime = null;
+                    }
+                    
                     // Play success sound
                     playSuccessSound();
                     
