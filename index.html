@@ -380,7 +380,7 @@
         }
         
         /* Show keyboard ONLY on mobile */
-        @media (max-width: 768px) {
+        @media (max-width: 1024px), (pointer: coarse) {
             #onScreenKeyboard {
                 display: flex;
                 gap: 0;  /* Remove gap between rows */
@@ -552,6 +552,12 @@
             }
         }
         
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
         /* Force green to persist on dying invaders with typing class */
         .invader.dying > .invader-word.typing {
             background-color: rgba(16, 185, 129, 0.8) !important;
@@ -697,19 +703,40 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;  /* Reduced by 2px (was 12px) */
-            padding: 6px 10px;  /* Reduced from 8px 16px to match tablet */
+            border-radius: 10px;
+            padding: 6px 10px;
             box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.2);
             display: flex;
             align-items: center;
-            height: 32px;  /* Reduced from 40px to match tablet */
-            font-size: 12px;  /* Reduced from 20px to match tablet */
+            height: 32px;
+            font-size: 12px;
             font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
         }
 
         #difficultyDisplay:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        #speedDisplay {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 6px 10px;
+            box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            height: 32px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #speedDisplay:hover {
             background: rgba(255, 255, 255, 0.2);
             transform: scale(1.05);
         }
@@ -1189,7 +1216,7 @@
             text-align: center;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             #celebrationCard {
                 width: 280px;
                 height: auto;
@@ -1394,7 +1421,7 @@
             display: none;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             #challengeTitle {
                 font-size: 20px;
             }
@@ -1602,7 +1629,8 @@
             border-radius: 20px;
             padding: 20px 24px;  /* Match tablet size */
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            max-width: 480px;  /* Keep this for desktop max-width */
+            width: fit-content;
+            max-width: calc(100vw - 40px);
             position: relative;
             z-index: 10;
         }
@@ -1642,6 +1670,8 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            width: 300px;
+            max-width: calc(100vw - 88px); /* 40px outer padding + 24px inner padding x2 */
         }
 
         .difficulty-option {
@@ -1671,19 +1701,124 @@
             color: rgba(255, 255, 255, 0.6);
         }
 
-        /* Screen shake animation */
-        @keyframes shake {
-            0%, 100% { transform: translate(0, 0); }
-            10%, 30%, 50%, 70%, 90% { transform: translate(-5px, 5px); }
-            20%, 40%, 60%, 80% { transform: translate(5px, -5px); }
+        /* Sentences Mode Fixed Overlay */
+        #sentencesOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 600;
+            pointer-events: none;
+            padding: 20px;
         }
+        
+        #sentencesOverlay.show {
+            display: flex;
+        }
+        
+        #sentencesBox {
+            background: rgba(26, 41, 66, 0.92);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 20px 28px;
+            max-width: 700px;
+            width: 95%;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+        
+        #sentencesBox.animate-in {
+            animation: sentence-slide-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        #sentencesBox.animate-out {
+            animation: sentence-slide-out 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        @keyframes sentence-slide-in {
+            from { opacity: 0; transform: translateY(-50px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes sentence-slide-out {
+            from { opacity: 1; transform: translateY(0); }
+            to   { opacity: 0; transform: translateY(50px); }
+        }
+        
+        #sentencesDurationBar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 2px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+        
+        #sentencesDurationFill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #FFD700);
+            border-radius: 2px;
+            width: 100%;
+        }
+        
+        #sentencesTimer {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            font-family: 'Press Start 2P', cursive;
+            margin-bottom: 12px;
+        }
+        
+        #sentencesText {
+            font-size: 18px;
+            color: white;
+            font-family: 'Press Start 2P', cursive;
+            line-height: 1.8;
+            letter-spacing: 1px;
+            word-break: keep-all;
+            overflow-wrap: normal;
+            white-space: normal;
+        }
+        
+        #sentencesText .word {
+            display: inline-block;
+        }
+        
+        #sentencesText .char.correct {
+            color: #10b981;
+        }
+        
+        #sentencesText .char.current {
+            background: rgba(255, 215, 0, 0.3);
+            animation: blink 0.8s ease-in-out infinite;
+        }
+        
+        @media (max-width: 1024px) {
+            #sentencesText {
+                font-size: 13px;
+                letter-spacing: 0px;
+            }
+            #sentencesBox {
+                padding: 14px 16px;
+            }
+        }
+
+
 
         .shake {
             animation: shake 0.5s;
         }
 
         /* Responsive adjustments */
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             body {
                 overflow: hidden;
             }
@@ -1789,7 +1924,7 @@
             }
             
             .difficulty-name {
-                font-size: 13px;  /* Reduced by ~20% (was 16px) */
+                font-size: 13px;
             }
             
             .difficulty-desc {
@@ -1912,7 +2047,7 @@
             }
             
             .difficulty-name {
-                font-size: 14px;
+                font-size: 13px;
             }
             
             .difficulty-desc {
@@ -1949,14 +2084,14 @@
     <div id="topbar">
         <div id="leftControls">
             <div id="score">Score: <span id="scoreValue">0</span></div>
-            <div id="difficultyDisplay">Easy</div>
-            <div id="categoryDisplay">All</div>
+            <div id="difficultyDisplay">Words</div>
+            <div id="speedDisplay">1x</div>
         </div>
         <div id="rightControls">
-            <button id="autoTestToggle" style="background: #3b82f6; margin-right: 10px; display: none;" title="Toggle Auto-Test Mode">
+            <button id="autoTestToggle" style="background: #3b82f6; display: none;" title="Toggle Auto-Test Mode">
                 <span style="font-size: 14px;">🤖 TEST</span>
             </button>
-            <button id="celebrationPreviewBtn" style="background: #10b981; margin-right: 10px; display: none;" title="Preview Celebration">
+            <button id="celebrationPreviewBtn" style="background: #10b981; display: none;" title="Preview Celebration">
                 <span style="font-size: 14px;">🎉</span>
             </button>
             <button id="pauseBtn"><span class="material-symbols-outlined">pause</span></button>
@@ -2039,29 +2174,40 @@
             <p id="gameSubtitle">Show your typing skills</p>
             
             <div id="difficultyOptions">
-                <div class="difficulty-option" data-difficulty="easy">
-                    <div class="difficulty-name">Easy</div>
-                    <div class="difficulty-desc">Slow invaders, more time</div>
+                <div class="difficulty-option" data-mode="words">
+                    <div class="difficulty-name">Words</div>
+                    <div class="difficulty-desc">Quick reflexes</div>
                 </div>
                 
-                <div class="difficulty-option" data-difficulty="medium">
-                    <div class="difficulty-name">Medium</div>
-                    <div class="difficulty-desc">Balanced challenge</div>
+                <div class="difficulty-option" data-mode="sentences">
+                    <div class="difficulty-name">Sentences</div>
+                    <div class="difficulty-desc">Rhythm flow</div>
                 </div>
                 
-                <div class="difficulty-option" data-difficulty="hard">
-                    <div class="difficulty-name">Hard</div>
-                    <div class="difficulty-desc">Fast invaders, quick typing</div>
+                <div class="difficulty-option" data-mode="math">
+                    <div class="difficulty-name">Math</div>
+                    <div class="difficulty-desc">Mental agility</div>
                 </div>
                 
-                <div class="difficulty-option" data-difficulty="superhard">
-                    <div class="difficulty-name">Superb</div>
-                    <div class="difficulty-desc">Expert typers only!</div>
+                <div class="difficulty-option" data-mode="journey">
+                    <div class="difficulty-name">Journey</div>
+                    <div class="difficulty-desc">Full mastery</div>
                 </div>
             </div>
         </div>
     </div>
     
+    <!-- Sentences Mode Fixed Overlay -->
+    <div id="sentencesOverlay">
+        <div id="sentencesBox">
+            <div id="sentencesDurationBar">
+                <div id="sentencesDurationFill"></div>
+            </div>
+            <div id="sentencesTimer">30s</div>
+            <div id="sentencesText"></div>
+        </div>
+    </div>
+
     <!-- Game Over Screen (outside gameContainer) -->
     <div id="gameOver">
         <h1>GAME OVER</h1>
@@ -2096,12 +2242,12 @@
                     <div id="celebrationBody">
                         <div class="left-stats">
                             <div class="stat-item">
-                                <div class="stat-label">WPM</div>
+                                <div class="stat-label" id="celebrationWpmLabel">WPM</div>
                                 <div class="stat-value" id="celebrationWpm">0</div>
                             </div>
                             
                             <div class="stat-item">
-                                <div class="stat-label">ACCURACY</div>
+                                <div class="stat-label" id="celebrationAccuracyLabel">ACCURACY</div>
                                 <div class="stat-value" id="celebrationAccuracy">0%</div>
                             </div>
                         </div>
@@ -2110,8 +2256,8 @@
                         
                         <div class="bottom-stats">
                             <div class="bottom-stats-left">
-                                <div class="bottom-stat-label">Incorrect attempts</div>
-                                <div class="bottom-stat-label">Missed attempts</div>
+                                <div class="bottom-stat-label" id="celebrationIncorrectLabel">Incorrect attempts</div>
+                                <div class="bottom-stat-label">Missed</div>
                             </div>
                             <div class="bottom-stats-right">
                                 <div class="bottom-stat-value" id="celebrationIncorrect">0</div>
@@ -2125,6 +2271,9 @@
                                 <div class="graph-time-label start" id="graphStartTime">0:00</div>
                                 <div class="graph-time-label center" id="graphCenterTime">(15 min)</div>
                                 <div class="graph-time-label end" id="graphEndTime">0:15</div>
+                            </div>
+                            <div id="graphLegend" style="font-size:8px; font-family:'Press Start 2P',cursive; text-align:center; margin-top:6px; color:rgba(255,255,255,0.5);">
+                                <span style="color:#FFD400">■ WPM</span> &nbsp; <span style="color:#10b981">■ Accuracy</span>
                             </div>
                         </div>
                     </div>
@@ -2205,6 +2354,10 @@
 
     <script>
         // Game state
+        // sessionId: incremented each time a new game starts.
+        // Every async callback captures the id at creation time and bails if it no longer matches.
+        let _sessionId = 0;
+
         const game = {
             score: 0,
             highestScore: 0,
@@ -2214,7 +2367,9 @@
             targetInvader: null,
             isGameOver: false,
             isPaused: false,
-            difficulty: 'easy',
+            mode: 'words', // 'words', 'sentences', 'math', 'journey'
+            journeyPhase: 1, // For journey mode: 1=words, 2=sentences, 3=math, 4=fast words+letters, 5=chaos
+            _phaseTransitioning: false,
             lastSpawn: 0,
             spawnInterval: 2500,
             invaderSpeed: 0.3,
@@ -2227,6 +2382,9 @@
             currentMathQuestion: null,
             isLetterMode: false,
             celebrationShown: false,
+            // Combo system
+            consecutiveHits: 0,
+            comboMultiplier: 1,
             // Stats tracking for celebration
             startTime: null,
             totalCharactersTyped: 0,
@@ -2239,23 +2397,237 @@
             // Performance history for graph (track WPM and accuracy over time)
             wpmHistory: [],
             accuracyHistory: [],
-            lastPerformanceCheck: null
+            lastPerformanceCheck: null,
+            lastSpeedIncrease: 0, // Track last score when speed was increased
+            // Math mode specific tracking
+            mathQuestionsAnswered: 0,
+            totalMathSolveTime: 0,
+            mathQuestionStartTime: null,
+            spmHistory: [],         // SPM samples over time for graph
+            solveTimeHistory: [],   // Avg solve time samples over time for graph
+            // Sentences mode specific
+            isSentenceActive: false,
+            sentenceTimer: null,
+            sentenceTimeLeft: 30,
+            currentSentenceIndex: 0,
+            usedSentences: []
         };
 
-        // Challenge sentences for milestone scores
-        const challengeSentences = [
-            "Jovial zebras quickly vexed my big friend Chuck.",
-            "Pack my box with five dozen liquor jugs.",
+        // Sentences for sentence mode (40-60 characters)
+        const sentences = [
             "The quick brown fox jumps over the lazy dog.",
-            "Crazy Fredrick bought many very exquisite opal jewels.",
+            "Pack my box with five dozen liquor jugs today.",
+            "How vexingly quick daft zebras jump in the fog.",
+            "The five boxing wizards jump quickly at dawn.",
+            "Sphinx of black quartz, judge my solemn vow.",
+            "Two driven jocks help fax my big quiz paper.",
+            "Five quacking zephyrs jolt my wax bed badly.",
+            "The jay, pig, fox, zebra and my wolves quack.",
+            "Crazy Fredrick bought many very exquisite jewels.",
+            "We promptly judged antique ivory buckles for prizes.",
             "A wizard's job is to vex chumps quickly in fog.",
-            "Sympathizing would fix Quaker objectives justly."
+            "Watch Jeopardy, Alex Trebek's fun TV quiz game.",
+            "Public buildings facing hazards jeopardize workers.",
+            "Few black taxis drive up major roads on quiet nights.",
+            "The job requires extra pluck and zeal from every worker."
         ];
         
         const challengeMilestones = [200, 300, 400, 500, 600, 700];
 
         // Letters for letter mode
         const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
+
+        // Helper function to get current mode based on journey phase
+        function getJourneyPhaseMode() {
+            if (game.mode !== 'journey') return game.mode;
+            const s = game.score;
+            if (s >= 900) return 'math';      // Phase 8: math 3x   (900-1000)
+            if (s >= 800) return 'words';     // Phase 7: letters 3x (800-899, isLetterMode flag)
+            if (s >= 500) return 'sentences'; // Phase 6: sentences 12s (500-799)
+            if (s >= 400) return 'words';     // Phase 5: words 3x  (400-499)
+            if (s >= 300) return 'math';      // Phase 4: math 2x   (300-399)
+            if (s >= 200) return 'words';     // Phase 3: letters 2x (200-299, isLetterMode flag)
+            if (s >= 100) return 'sentences'; // Phase 2: sentences 18s (100-199)
+            return 'words';                   // Phase 1: words 2x  (0-99)
+        }
+
+        // Get journey phase number from score
+        function getJourneyPhaseNumber() {
+            const s = game.score;
+            if (s >= 900) return 8;
+            if (s >= 800) return 7;
+            if (s >= 500) return 6;
+            if (s >= 400) return 5;
+            if (s >= 300) return 4;
+            if (s >= 200) return 3;
+            if (s >= 100) return 2;
+            return 1;
+        }
+        
+        // Check and trigger journey phase transitions
+        function checkJourneyPhaseTransition() {
+            if (game.mode !== 'journey') return;
+            if (game._phaseTransitioning) return;
+
+            const newPhase = getJourneyPhaseNumber();
+            const oldPhase = game.journeyPhase;
+
+            if (newPhase !== oldPhase) {
+                game.journeyPhase = newPhase;
+                const newMode = getJourneyPhaseMode();
+
+                // Set speed multiplier for this phase
+                // Phase speeds: 1=words 2x | 2=sentences 18s | 3=letters 2x | 4=math 2x
+                // 5=words 3x | 6=sentences 12s | 7=letters 3x | 8=math 3x
+                const phaseSpeed = { 1:2, 2:1, 3:2, 4:2, 5:3, 6:1, 7:3, 8:3 };
+                speedMultiplier = phaseSpeed[newPhase] || 1;
+                speedDisplay.textContent = speedMultiplier + 'x';
+
+                // Letter mode: phases 3 (200-299) and 7 (800-899)
+                game.isLetterMode = (newPhase === 3 || newPhase === 7);
+
+                // Math mode flag
+                game.isMathMode = (newMode === 'math');
+
+                const phaseNames = {
+                    2: 'SENTENCES (18s)',
+                    3: 'LETTERS (2x)',
+                    4: 'MATH (2x)',
+                    5: 'WORDS (3x)',
+                    6: 'SENTENCES (12s)',
+                    7: 'LETTERS (3x)',
+                    8: 'MATH (3x)'
+                };
+                const phaseColors = {
+                    2: '#4A90E2',
+                    3: '#00D4FF',
+                    4: '#E67E22',
+                    5: '#FF4500',
+                    6: '#4A90E2',
+                    7: '#00D4FF',
+                    8: '#E67E22'
+                };
+
+                triggerPhaseTransition(newMode, newPhase, phaseNames[newPhase] || '', phaseColors[newPhase] || '#fff');
+            }
+        }
+        
+        // Visual transition between journey phases
+        function triggerPhaseTransition(newMode, newPhase, phaseName, phaseColor) {
+            if (game._phaseTransitioning) return;
+            game._phaseTransitioning = true;
+            game.isPaused = true;
+            resetCombo();
+            
+            // Clear all invaders
+            game.invaders.forEach(inv => {
+                if (inv.element) inv.element.remove();
+            });
+            game.invaders = [];
+            game.isSentenceActive = false;
+            
+            // Reset mode flags based on new phase
+            game.isMathMode = (newMode === 'math');
+            game.isLetterMode = (newPhase === 3 || newPhase === 7); // Phases 3 (200–299) and 7 (800–899) = letters
+            
+            // Adjust invader speed for phase (base speed; speedMultiplier handles the rest)
+            // Sentences phases use slower base so overlay feels right; words/letters/math use normal base
+            if (newPhase === 2 || newPhase === 7) {
+                game.invaderSpeed = 0.3; // sentences - invader speed irrelevant (overlay)
+            } else {
+                game.invaderSpeed = 0.3; // all non-sentence phases start at base speed
+            }
+            
+            // Handle keyboard switching for math mode on mobile
+            const isMobile = (window.matchMedia("(max-width: 1024px)").matches || window.matchMedia("(pointer: coarse)").matches);
+            if (isMobile) {
+                const normalKeyboard = document.getElementById('onScreenKeyboard');
+                const numberKeyboard = document.getElementById('numberKeyboard');
+                
+                if (newMode === 'math') {
+                    normalKeyboard.style.display = 'none';
+                    numberKeyboard.classList.add('show');
+                } else {
+                    normalKeyboard.style.display = '';
+                    numberKeyboard.classList.remove('show');
+                }
+            }
+
+            // Show fullscreen transition
+            showPhaseTransitionScreen(phaseName || '', phaseColor || '#fff');
+            
+            // Resume after 2 seconds
+            const _phaseSid = _sessionId;
+            setTimeout(() => {
+                if (_sessionId !== _phaseSid) return; // stale if mode switched
+                game.isPaused = false;
+                game._phaseTransitioning = false;
+                hidePhaseTransitionScreen();
+            }, 2000);
+        }
+        
+        // Show phase transition overlay
+        function showPhaseTransitionScreen(phaseName, accentColor) {
+            let overlay = document.getElementById('phaseTransitionOverlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'phaseTransitionOverlay';
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 5000;
+                    font-family: 'Press Start 2P', cursive;
+                    font-size: 32px;
+                    color: white;
+                    text-align: center;
+                    padding: 20px;
+                    transition: opacity 0.3s;
+                `;
+                document.body.appendChild(overlay);
+            }
+            
+            overlay.style.background = 'radial-gradient(ellipse at center, #1a2942 0%, #0a1628 50%, #000814 100%)';
+            overlay.style.opacity = '0';
+            overlay.style.display = 'flex';
+            overlay.innerHTML = `
+                <div style="
+                    background: rgba(26, 41, 66, 0.85);
+                    border: 2px solid ${accentColor};
+                    border-radius: 16px;
+                    padding: 30px 48px;
+                    box-shadow: 0 0 40px ${accentColor}44, 0 8px 32px rgba(0,0,0,0.5);
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 12px;
+                ">
+                    <div style="font-size: 13px; color: rgba(255,255,255,0.5); letter-spacing: 2px;">NEXT PHASE</div>
+                    <div style="font-size: 28px; color: ${accentColor}; text-shadow: 0 0 20px ${accentColor}88;">${phaseName}</div>
+                </div>
+            `;
+            
+            // Fade in
+            setTimeout(() => {
+                overlay.style.opacity = '1';
+            }, 10);
+        }
+        
+        function hidePhaseTransitionScreen() {
+            const overlay = document.getElementById('phaseTransitionOverlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 300);
+            }
+        }
 
         // Math mode functions
         function generateMathQuestion() {
@@ -2416,7 +2788,7 @@
         const scoreElement = document.getElementById('score');
         const scoreValue = document.getElementById('scoreValue');
         const difficultyDisplay = document.getElementById('difficultyDisplay');
-        const categoryDisplay = document.getElementById('categoryDisplay');
+        const categoryDisplay = null; // removed from UI
         const pauseBtn = document.getElementById('pauseBtn');
         const restartGameBtn = document.getElementById('restartGameBtn');
         const gameOverScreen = document.getElementById('gameOver');
@@ -2429,61 +2801,82 @@
         // Invader class
         class Invader {
             constructor() {
-                // Letter mode - single random letter
-                if (game.isLetterMode) {
+                // Determine what type of invader to spawn based on mode and journey phase
+                const currentMode = game.mode === 'journey' ? getJourneyPhaseMode() : game.mode;
+                
+                if (currentMode === 'sentences') {
+                    // Sentences are handled via fixed overlay, not moving invaders
+                    this.word = '';
+                    this.isSentence = true;
+                    this.isNumber = false;
+                    this.isUfo = false;
+                    this.x = -9999;
+                    this.y = -9999;
+                    this.speedY = 0;
+                    this.speedX = 0;
+                    this.isDying = true;
+                    this.element = null; // no DOM element
+                    return;
+                } else if (currentMode === 'math') {
+                    // Math invader - math problem
+                    const mathQuestion = generateMathQuestion();
+                    this.word = mathQuestion.answer;
+                    this.displayWord = mathQuestion.question;
+                    this.emoji = '💥';
+                    this.isMathQuestion = true;
+                    this.isNumber = false;
+                    this.isSentence = false;
+                    this.isUfo = false;
+                    
+                    const estimatedWidth = (mathQuestion.question.length * 15) + 40;
+                    this.x = Math.max(0, (window.innerWidth / 2) - (estimatedWidth / 2));
+                    this.y = 0;
+                    this.speedY = game.invaderSpeed * (0.8 + Math.random() * 0.4) * speedMultiplier;
+                    this.speedX = (Math.random() - 0.5) * 0.3;
+                    this.element = this.createMathElement();
+                    this.isDying = false;
+                    return;
+                } else if (game.isLetterMode) {
+                    // Letter mode - single random a–z letter with ⭐ emoji
                     this.word = letters[Math.floor(Math.random() * letters.length)];
                     this.emoji = '⭐';
                     this.isLetter = true;
+                    this.isNumber = false;
+                    this.isSentence = false;
                     this.isUfo = false;
-                    
-                    // Estimate width for single letter (approx 100px)
-                    const estimatedWidth = 100;
-                    this.x = Math.random() * (window.innerWidth - estimatedWidth);
+
+                    const estimatedWidth = 60;
+                    this.x = Math.random() * Math.max(100, window.innerWidth - estimatedWidth);
                     this.y = 0;
-                    // Slow speed like easy mode
-                    this.speedY = 0.3 * (0.8 + Math.random() * 0.4);
+                    this.speedY = game.invaderSpeed * (0.8 + Math.random() * 0.4) * speedMultiplier;
                     this.speedX = (Math.random() - 0.5) * 0.3;
                     this.element = this.createElement();
                     this.isDying = false;
-                    return;
-                }
-                
-                // 1 in 5 chance to be a UFO
-                this.isUfo = Math.random() < 0.2;
-                
-                // Get words already on screen
-                const usedWords = game.invaders
-                    .filter(z => !z.isDying)
-                    .map(z => z.word);
-                
-                if (this.isUfo) {
-                    // UFO gets longer words (combine two words)
-                    let word1, word2;
-                    do {
-                        word1 = words[Math.floor(Math.random() * words.length)];
-                        word2 = words[Math.floor(Math.random() * words.length)];
-                        this.word = word1 + word2;
-                    } while (usedWords.includes(this.word));
-                    this.emoji = '🛸';
                 } else {
-                    // Pick a word not already on screen
+                    // Words mode - single words with 👾
+                    const usedWords = game.invaders
+                        .filter(z => !z.isDying)
+                        .map(z => z.word);
+                    
                     let availableWords = words.filter(w => !usedWords.includes(w));
-                    // If all words are used, just pick any word
                     if (availableWords.length === 0) {
                         availableWords = words;
                     }
                     this.word = availableWords[Math.floor(Math.random() * availableWords.length)];
                     this.emoji = '👾';
+                    this.isLetter = false;
+                    this.isNumber = false;
+                    this.isSentence = false;
+                    this.isUfo = false;
+                    
+                    const estimatedWidth = (this.word.length * 15) + 40;
+                    this.x = Math.random() * Math.max(100, window.innerWidth - estimatedWidth);
+                    this.y = 0;
+                    this.speedY = game.invaderSpeed * (0.8 + Math.random() * 0.4) * speedMultiplier;
+                    this.speedX = (Math.random() - 0.5) * 0.3;
+                    this.element = this.createElement();
+                    this.isDying = false;
                 }
-                
-                // Estimate word label width (rough: 15px per character + 40px padding)
-                const estimatedWidth = (this.word.length * 15) + 40;
-                this.x = Math.random() * Math.max(100, window.innerWidth - estimatedWidth);
-                this.y = 0;
-                this.speedY = game.invaderSpeed * (0.8 + Math.random() * 0.4);
-                this.speedX = (Math.random() - 0.5) * 0.3;
-                this.element = this.createElement();
-                this.isDying = false;
             }
 
             createElement() {
@@ -2528,6 +2921,7 @@
 
             update() {
                 if (this.isDying) return;
+                if (!this.element) { this.isDying = true; return; }
 
                 this.y += this.speedY;
                 this.x += this.speedX;
@@ -2569,6 +2963,7 @@
                     // Track missed word/math/letter when reaching the bottom side
                     game.missedWords++;
                     game.consecutiveMisses++;
+                    resetCombo();
                     
                     // In math mode, deduct 4 points and spawn new question
                     if (game.isMathMode && this.isMathQuestion) {
@@ -2590,7 +2985,7 @@
                         }, 500);
                         
                         // Check if game over
-                        if (game.score === 0 || game.consecutiveMisses >= 10) {
+                        if (game.score === 0 || game.consecutiveMisses >= 5) {
                             gameOver();
                             return;
                         }
@@ -2622,7 +3017,7 @@
                     }, 500);
                     
                     // Check if game over
-                    if (game.score === 0 || game.consecutiveMisses >= 10) {
+                    if (game.score === 0 || game.consecutiveMisses >= 5) {
                         gameOver();
                         return;
                     }
@@ -2633,6 +3028,7 @@
 
             die() {
                 this.isDying = true;
+                if (!this.element) return;
                 this.element.classList.add('dying');
                 setTimeout(() => {
                     this.element.remove();
@@ -2743,6 +3139,17 @@
 
         // Spawn invader
         function spawnInvader() {
+            if (game.isGameOver) return; // safety guard
+            const currentMode = game.mode === 'journey' ? getJourneyPhaseMode() : game.mode;
+            
+            // Sentences mode - use fixed overlay, not moving invaders
+            if (currentMode === 'sentences') {
+                if (!game.isSentenceActive) {
+                    spawnSentence();
+                }
+                return;
+            }
+            
             // In math mode, only spawn if no active invaders
             if (game.isMathMode) {
                 const activeInvaders = game.invaders.filter(z => !z.isDying).length;
@@ -2774,25 +3181,209 @@
         function spawnMathInvader() {
             const mathQuestion = generateMathQuestion();
             game.currentMathQuestion = mathQuestion;
+            game.mathQuestionStartTime = Date.now();
             
-            // Create a special invader with the math question
+            // Create invader directly (Invader constructor in math mode already creates the element)
             const invader = new Invader();
-            invader.word = mathQuestion.answer; // The answer is what we match
-            invader.displayWord = mathQuestion.question; // But we display the question
-            invader.isMathQuestion = true;
+            // Override word to be the answer (display is already the question from constructor)
+            game.invaders.push(invader);
+        }
+
+        // Sentences mode - spawn a fixed sentence overlay
+        function spawnSentence() {
+            // Guard: only run if we're in a sentences-capable mode
+            const _currentMode = game.mode === 'journey' ? getJourneyPhaseMode() : game.mode;
+            if (_currentMode !== 'sentences') return;
+            if (game.isSentenceActive) return;
+            if (game.isGameOver) return;
             
-            // Position in center horizontally (estimate label width for centering)
-            const estimatedWidth = (mathQuestion.question.length * 15) + 40;
-            invader.x = Math.max(0, (window.innerWidth / 2) - (estimatedWidth / 2));
+            game.isSentenceActive = true;
+            game.currentInput = '';
             
-            // Update the invader element to show the question
-            const existingElement = document.querySelector('.invader');
-            if (existingElement) {
-                existingElement.remove();
+            // Pick a sentence (avoid recent repeats)
+            let availableSentences = sentences.filter((_, i) => !game.usedSentences.includes(i));
+            if (availableSentences.length === 0) {
+                game.usedSentences = [];
+                availableSentences = sentences;
+            }
+            const sentenceIndex = Math.floor(Math.random() * availableSentences.length);
+            const sentenceText = availableSentences[sentenceIndex];
+            const originalIndex = sentences.indexOf(sentenceText);
+            game.usedSentences.push(originalIndex);
+            game.currentSentenceText = sentenceText;
+            
+            // Calculate duration:
+            // Journey: phase 2 = 18s, phase 7 = 12s; standalone sentences mode scales with score
+            let duration;
+            if (game.mode === 'journey') {
+                duration = game.journeyPhase === 6 ? 12 : 18; // Phase 6 (500–799) = 12s, Phase 2 (100–199) = 18s
+            } else {
+                duration = Math.max(8, 30 - Math.floor(game.score / 100));
+            }
+            game.sentenceTimeLeft = duration;
+            
+            const overlay = document.getElementById('sentencesOverlay');
+            const box = document.getElementById('sentencesBox');
+            const textEl = document.getElementById('sentencesText');
+            const timerEl = document.getElementById('sentencesTimer');
+            const fillEl = document.getElementById('sentencesDurationFill');
+            
+            // Render chars grouped by word to prevent mid-word line breaks
+            const words = sentenceText.split(' ');
+            textEl.innerHTML = words.map(word => 
+                `<span class="word">${word.split('').map(char => `<span class="char">${char}</span>`).join('')}</span>`
+            ).join('<span class="char space">&nbsp;</span>');
+            
+            timerEl.textContent = `${duration}s`;
+            timerEl.style.color = 'rgba(255,255,255,0.5)';
+            
+            // Reset progress bar instantly (full width, no transition)
+            fillEl.style.transition = 'none';
+            fillEl.style.width = '100%';
+            // Remove CSS-based transition shrink - bar will be updated by interval
+            
+            // Show overlay and trigger slide-in animation
+            overlay.classList.add('show');
+            box.classList.remove('animate-out');
+            // Force reflow so animation restarts cleanly
+            void box.offsetWidth;
+            box.classList.add('animate-in');
+            
+            // Start progress bar + countdown AFTER slide-in (400ms)
+            const _spawnSession = _sessionId; // capture session at spawn time
+            setTimeout(() => {
+                // Bail if the session changed (mode switch, restart, etc.)
+                if (_sessionId !== _spawnSession || !game.isSentenceActive) return;
+                
+                // Clear any leftover timer (safety guard)
+                if (game.sentenceTimer) {
+                    clearInterval(game.sentenceTimer);
+                    game.sentenceTimer = null;
+                }
+                
+                // Update both bar width and text every second in sync
+                game.sentenceTimer = setInterval(() => {
+                    // Bail if session changed or sentence was dismissed
+                    if (_sessionId !== _spawnSession || !game.isSentenceActive) {
+                        clearInterval(game.sentenceTimer);
+                        game.sentenceTimer = null;
+                        return;
+                    }
+                    if (game.isPaused) return;
+                    game.sentenceTimeLeft--;
+                    timerEl.textContent = `${Math.max(0, game.sentenceTimeLeft)}s`;
+                    timerEl.style.color = game.sentenceTimeLeft <= 5 ? '#ff4757' : 'rgba(255,255,255,0.5)';
+                    const pct = Math.max(0, (game.sentenceTimeLeft / duration) * 100);
+                    fillEl.style.transition = 'width 1s linear';
+                    fillEl.style.width = pct + '%';
+                    if (game.sentenceTimeLeft <= 0) {
+                        skipSentence();
+                    }
+                }, 1000);
+            }, 400);
+        }
+        
+        function updateSentenceProgress() {
+            const textEl = document.getElementById('sentencesText');
+            if (!textEl) return;
+            const chars = textEl.querySelectorAll('.char');
+            const input = game.currentInput;
+            chars.forEach((char, index) => {
+                char.classList.remove('correct', 'current');
+                if (index < input.length) {
+                    char.classList.add('correct');
+                } else if (index === input.length) {
+                    char.classList.add('current');
+                }
+            });
+        }
+        
+        function dismissSentenceBox(callback) {
+            const box     = document.getElementById('sentencesBox');
+            const overlay = document.getElementById('sentencesOverlay');
+            const sid     = _sessionId; // capture current session
+            // Slide out downward via CSS animation
+            box.classList.remove('animate-in');
+            void box.offsetWidth;
+            box.classList.add('animate-out');
+            setTimeout(() => {
+                // If a new game started while we were animating, bail out
+                if (_sessionId !== sid) return;
+                overlay.classList.remove('show');
+                box.classList.remove('animate-out');
+                if (callback) callback();
+            }, 360);
+        }
+        
+        function completeSentence() {
+            clearInterval(game.sentenceTimer);
+            game.sentenceTimer = null;
+            game.isSentenceActive = false;
+            game.currentInput = '';
+            
+            // Play success sound (same as word kill)
+            playSuccessSound();
+            
+            // Award points — flat 20 pts, no time bonus
+            const earnedPoints = 20;
+            const oldScore = game.score;
+            game.score += earnedPoints;
+            if (game.score > game.highestScore) game.highestScore = game.score;
+            
+            // Combo update
+            game.consecutiveHits++;
+            updateComboMultiplier();
+            game.consecutiveMisses = 0;
+            
+            // Check journey phase transitions
+            checkJourneyPhaseTransition();
+            
+            // Check for celebration
+            if (game.score >= 1000 && !game.celebrationShown) {
+                game.celebrationShown = true;
+                dismissSentenceBox(() => showCelebration());
+                return;
             }
             
-            invader.element = invader.createMathElement();
-            game.invaders.push(invader);
+            scoreValue.classList.remove('score-increase', 'score-decrease');
+            void scoreValue.offsetWidth;
+            scoreValue.classList.add('score-increase');
+            animateValue(scoreValue, oldScore, game.score, 400);
+            setTimeout(() => scoreValue.classList.remove('score-increase'), 500);
+            
+            // Slide out then spawn next
+            dismissSentenceBox(() => {
+                if (!game.isGameOver) spawnSentence();
+            });
+        }
+        
+        function skipSentence() {
+            clearInterval(game.sentenceTimer);
+            game.sentenceTimer = null;
+            game.isSentenceActive = false;
+            game.currentInput = '';
+            game.missedWords++;
+            resetCombo();
+            
+            const penalty = 15;
+            const oldScore = game.score;
+            game.score = Math.max(0, game.score - penalty);
+            
+            scoreValue.classList.remove('score-increase', 'score-decrease');
+            void scoreValue.offsetWidth;
+            scoreValue.classList.add('score-decrease');
+            animateValue(scoreValue, oldScore, game.score, 400);
+            setTimeout(() => scoreValue.classList.remove('score-decrease'), 500);
+            
+            if (game.score === 0) {
+                dismissSentenceBox(() => gameOver());
+                return;
+            }
+            
+            // Slide out then spawn next
+            dismissSentenceBox(() => {
+                if (!game.isGameOver) spawnSentence();
+            });
         }
 
         // Shoot gun
@@ -2832,46 +3423,168 @@
         }
 
         function updateScore(word, invader = null) {
-            // Scoring: Math = 4 points, Letters = 1 point, Words = length
-            let points;
-            if (invader && invader.isMathQuestion) {
-                points = 4;
-            } else if (invader && invader.isLetter) {
-                points = 1;
+            let basePoints = 0;
+            
+            // Mode-based scoring
+            if (invader && invader.isSentence) {
+                basePoints = 20; // flat 20 pts
+            } else if (invader && invader.isMathQuestion) {
+                basePoints = 10;
+                // +1 bonus if answered in under 1 second
+                if (game.mathQuestionStartTime && (Date.now() - game.mathQuestionStartTime) < 1000) {
+                    basePoints += 1;
+                }
+            } else if (invader && invader.isNumber) {
+                basePoints = 5; // 3-digit numbers
             } else {
-                points = word.length;
+                basePoints = word.length; // 1 point per character for words
             }
             
+            // Apply combo multiplier
+            const earnedPoints = Math.floor(basePoints * game.comboMultiplier);
             const oldScore = game.score;
-            game.score += points;
-            // Reset consecutive misses on a successful hit
+            game.score += earnedPoints;
+            
+            // Increment consecutive hits for combo
+            game.consecutiveHits++;
+            updateComboMultiplier();
+            
+            // Reset consecutive misses
             game.consecutiveMisses = 0;
             
-            // Update highest score if current score exceeds it
+            // Check for journey phase transitions
+            checkJourneyPhaseTransition();
+            
+            // Update highest score
             if (game.score > game.highestScore) {
                 game.highestScore = game.score;
             }
             
-            // Check if we hit a challenge milestone
-            checkChallengeMilestone();
+            // Check for celebration at 1000
+            if (game.score >= 1000 && !game.celebrationShown) {
+                game.celebrationShown = true;
+                setTimeout(() => {
+                    showCelebration();
+                }, 500);
+            }
             
             // Animate score increase
             scoreValue.classList.remove('score-increase', 'score-decrease');
-            void scoreValue.offsetWidth; // Force reflow
+            void scoreValue.offsetWidth;
             scoreValue.classList.add('score-increase');
-            
-            // Animate the counter from old value to new value
             animateValue(scoreValue, oldScore, game.score, 400);
-            
-            // Remove animation class after animation completes
             setTimeout(() => {
                 scoreValue.classList.remove('score-increase');
             }, 500);
         }
+        
+        // Update combo multiplier based on consecutive hits
+        function updateComboMultiplier() {
+            if (game.consecutiveHits >= 10) {
+                game.comboMultiplier = 3;
+            } else if (game.consecutiveHits >= 5) {
+                game.comboMultiplier = 2;
+            } else if (game.consecutiveHits >= 3) {
+                game.comboMultiplier = 1.5;
+            } else {
+                game.comboMultiplier = 1;
+            }
+            updateComboDisplay();
+        }
+        
+        // Reset combo on miss or error
+        function resetCombo() {
+            game.consecutiveHits = 0;
+            game.comboMultiplier = 1;
+            updateComboDisplay();
+        }
+        
+        // Update combo display in UI
+        function updateComboDisplay() {
+            let comboDisplay = document.getElementById('comboDisplay');
+            if (!comboDisplay) {
+                comboDisplay = document.createElement('div');
+                comboDisplay.id = 'comboDisplay';
+                comboDisplay.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    font-family: 'Press Start 2P', cursive;
+                    font-size: 16px;
+                    color: #FFD700;
+                    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+                    z-index: 1100;
+                    display: none;
+                    pointer-events: none;
+                `;
+                document.body.appendChild(comboDisplay);
+            }
+            
+            if (game.consecutiveHits >= 3) {
+                comboDisplay.textContent = `${game.consecutiveHits}x COMBO!`;
+                comboDisplay.style.display = 'block';
+                
+                if (game.comboMultiplier >= 3) {
+                    comboDisplay.style.color = '#FF4500';
+                    comboDisplay.style.textShadow = '0 0 15px rgba(255, 69, 0, 0.7)';
+                } else if (game.comboMultiplier >= 2) {
+                    comboDisplay.style.color = '#FF8C00';
+                    comboDisplay.style.textShadow = '0 0 12px rgba(255, 140, 0, 0.6)';
+                } else {
+                    comboDisplay.style.color = '#FFD700';
+                    comboDisplay.style.textShadow = '0 0 10px rgba(255, 215, 0, 0.5)';
+                }
+            } else {
+                comboDisplay.style.display = 'none';
+            }
+        }
+        
+        // Show combo milestone messages
+        function showComboMessage(message, color) {
+            let messageDiv = document.getElementById('comboMessage');
+            if (!messageDiv) {
+                messageDiv = document.createElement('div');
+                messageDiv.id = 'comboMessage';
+                messageDiv.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    font-family: 'Press Start 2P', cursive;
+                    font-size: 36px;
+                    color: ${color};
+                    text-shadow: 0 0 20px ${color};
+                    z-index: 5500;
+                    pointer-events: none;
+                    opacity: 0;
+                    transition: opacity 0.3s;
+                `;
+                document.body.appendChild(messageDiv);
+            }
+            
+            messageDiv.textContent = message;
+            messageDiv.style.color = color;
+            messageDiv.style.textShadow = `0 0 20px ${color}`;
+            messageDiv.style.opacity = '1';
+            
+            setTimeout(() => {
+                messageDiv.style.opacity = '0';
+            }, 1000);
+        }
+        
+        // Screen shake effect
+        function triggerScreenShake() {
+            const container = document.getElementById('gameContainer');
+            container.style.animation = 'shake 0.3s';
+            setTimeout(() => {
+                container.style.animation = '';
+            }, 300);
+        }
 
-        // Check if score reached a challenge milestone
+        // Check if score reached a challenge milestone (LEGACY - kept for compatibility)
         function checkChallengeMilestone() {
-            const isMobile = window.matchMedia("(max-width: 768px)").matches;
+            const isMobile = (window.matchMedia("(max-width: 1024px)").matches || window.matchMedia("(pointer: coarse)").matches);
             
             // Check for celebration at 1000
             if (game.score >= 1000 && !game.celebrationShown) {
@@ -2991,6 +3704,12 @@
             game.invaders.forEach(invader => {
                 if (invader.isDying || !invader.wordElement) return;
                 
+                // In math mode: never show prefix progress (would reveal answer length proximity)
+                if (game.isMathMode) {
+                    invader.wordElement.style.setProperty('--progress', '0%');
+                    return;
+                }
+                
                 if (game.currentInput && invader.word.startsWith(game.currentInput)) {
                     // Calculate progress percentage
                     const progress = (game.currentInput.length / invader.word.length) * 100;
@@ -3008,7 +3727,8 @@
             if (game.currentInput && game.currentInput.length > 0) {
                 inputDisplay.classList.add('active');
                 
-                if (game.targetInvader && game.targetInvader.word && !game.isMathMode) {
+                const isMathTarget = game.isMathMode || (game.targetInvader && game.targetInvader.isMathQuestion);
+                if (game.targetInvader && game.targetInvader.word && !isMathTarget) {
                     // Show target word with progress (NOT in math mode to avoid revealing answer)
                     const targetWord = game.targetInvader.word;
                     const typed = game.currentInput;
@@ -3117,7 +3837,7 @@
 
         // Keep mobile input focused during game (mobile only)
         mobileInput.addEventListener('blur', () => {
-            const isMobile = window.matchMedia("(max-width: 768px)").matches;
+            const isMobile = (window.matchMedia("(max-width: 1024px)").matches || window.matchMedia("(pointer: coarse)").matches);
             if (!game.isGameOver && !game.isPaused && isMobile) {
                 setTimeout(() => mobileInput.focus(), 10);
             }
@@ -3126,179 +3846,52 @@
         // Keyboard input
         document.addEventListener('keydown', (e) => {
             if (game.isGameOver) return;
-            
-            // Handle challenge mode separately
-            if (game.isChallenge) {
-                handleChallengeInput(e);
+
+            // Challenge mode
+            if (game.isChallenge) { handleChallengeInput(e); return; }
+
+            // Sentences mode
+            const currentInputMode = game.mode === 'journey' ? getJourneyPhaseMode() : game.mode;
+            if (currentInputMode === 'sentences' && game.isSentenceActive) {
+                handleSentenceInput(e);
                 return;
             }
-            
-            // Spacebar to pause/unpause
+
+            // Spacebar → pause
             if (e.key === ' ' || e.key === 'Spacebar') {
                 e.preventDefault();
                 togglePause();
                 return;
             }
-            
+
             if (game.isPaused) return;
 
+            const _mode = game.mode === 'journey' ? getJourneyPhaseMode() : game.mode;
+            const _isMath = _mode === 'math' || game.isMathMode;
+
+            // ── Backspace ──────────────────────────────────────────────────────
             if (e.key === 'Backspace') {
                 game.currentInput = game.currentInput.slice(0, -1);
                 mobileInput.value = game.currentInput;
                 updateWordProgress();
                 updateInputDisplay();
                 updateKeyboardHighlight();
-            } else if (e.key === 'Enter') {
-                game.currentInput = '';
-                mobileInput.value = '';
-                game.targetInvader = null;
-                rotateRocketToTarget(null);
-                updateWordProgress();
-                updateInputDisplay();
-                updateKeyboardHighlight();
-            } else if (e.key.length === 1 && /[a-z0-9]/i.test(e.key)) {
-                const newInput = game.currentInput + e.key.toLowerCase();
-                
-                // Track character typed
-                game.totalCharactersTyped++;
-                
-                // Check if any invader word starts with this input
-                const hasMatch = game.invaders.some(
-                    inv => !inv.isDying && inv.word.startsWith(newInput)
-                );
-                
-                if (!hasMatch) {
-                    // Track incorrect attempt
-                    game.incorrectAttempts++;
-                    
-                    // Play error sound and reset input completely
-                    playErrorSound();
-                    game.currentInput = '';
-                    mobileInput.value = '';
-                    game.targetInvader = null;
-                    rotateRocketToTarget(null);
-                    updateWordProgress();
-                    updateInputDisplay();
-                    
-                    updateKeyboardHighlight();
-                    // Clear all highlights
-                    game.invaders.forEach(z => {
-                        if (!z.isDying && z.wordElement) {
-                            z.wordElement.classList.remove('typing');
-                        }
-                    });
-                    return;
-                }
-                
-                // Track correct character
-                game.correctCharacters++;
-                
-                // Start word timer if this is first character of new word
-                if (game.currentInput === '' || !game.wordStartTime) {
-                    game.wordStartTime = Date.now();
-                }
-                
-                game.currentInput = newInput;
-                mobileInput.value = newInput;
-                
-                // Check for complete match
-                const matchedInvader = game.invaders.find(
-                    z => !z.isDying && z.word === game.currentInput
-                );
-                
-                if (matchedInvader) {
-                    // Track fastest word time
-                    if (game.wordStartTime) {
-                        const wordTime = Date.now() - game.wordStartTime;
-                        if (!game.fastestWordTime || wordTime < game.fastestWordTime) {
-                            game.fastestWordTime = wordTime;
-                        }
-                        game.wordStartTime = null;
-                    }
-                    
-                    // Play success sound
-                    playSuccessSound();
-                    
-                    // Turn green only on completion
-                    matchedInvader.wordElement.classList.add('typing');
-                    matchedInvader.wordElement.style.setProperty('--progress', '110%');
-                    
-                    // Mark as dying immediately to protect the typing class
-                    matchedInvader.isDying = true;
-                    
-                    // Shoot and get travel time
-                    const travelTime = shoot(matchedInvader);
-                    
-                    // Delay invader death animation until laser hits
-                    setTimeout(() => {
-                        matchedInvader.element.classList.add('dying');
-                        setTimeout(() => {
-                            matchedInvader.element.remove();
-                        }, 500);
-                    }, travelTime);
-                    
-                    updateScore(matchedInvader.word, matchedInvader);
-                    
-                    // In math mode, spawn new question after answering correctly
-                    if (game.isMathMode && matchedInvader.isMathQuestion) {
-                        setTimeout(() => {
-                            spawnMathInvader();
-                        }, travelTime + 500);
-                    }
-                    
-                    game.currentInput = '';
-                    mobileInput.value = '';
-                    game.targetInvader = null;
-                    rotateRocketToTarget(null);
-                    updateWordProgress();
-                    updateInputDisplay();
-                    
-                    updateKeyboardHighlight();
-                    // Clear all highlights
-                    game.invaders.forEach(z => {
-                        if (!z.isDying && z.wordElement) {
-                            z.wordElement.classList.remove('typing');
-                        }
-                    });
-                    return;
-                }
+
+            // ── Digits (math mode) ─────────────────────────────────────────────
+            } else if (_isMath && /^[0-9]$/.test(e.key)) {
+                _handleMathKey(e.key);
+
+            // ── Letters / digits (word / letter mode) ──────────────────────────
+            } else if (!_isMath && e.key.length === 1 && /[a-z0-9]/i.test(e.key)) {
+                _handleWordKey(e.key.toLowerCase());
             }
-            
-            // Update target tracking (but DON'T turn background green until complete)
-            let foundMatch = false;
-            let targetInvader = null;
-            
-            game.invaders.forEach(invader => {
-                if (invader.isDying || !invader.wordElement) return;
-                
-                if (game.currentInput && invader.word.startsWith(game.currentInput)) {
-                    // DON'T add typing class - no green background until complete
-                    if (!foundMatch) {
-                        foundMatch = true;
-                        targetInvader = invader;
-                    }
-                }
-                
-                // Make sure no backgrounds are green while typing
-                // But NEVER remove from dying invaders (they should stay green)
-                if (!invader.isDying) {
-                    invader.wordElement.classList.remove('typing');
-                }
-            });
-            
-            // Update word progress (character-level green)
-            updateWordProgress();
-            
-            // Store target and rotate rocket
-            game.targetInvader = targetInvader;
-            rotateRocketToTarget(targetInvader);
-            updateInputDisplay();
-            updateKeyboardHighlight();
         });
 
         // Game loop
         let lastTime = 0;
-        function gameLoop(timestamp) {
+        function gameLoop(timestamp, loopSession) {
+            // If this RAF callback belongs to an old session, silently stop
+            if (loopSession !== undefined && loopSession !== _sessionId) return;
             if (game.isGameOver) return;
 
             if (!game.isPaused) {
@@ -3313,8 +3906,13 @@
 
                 // Update invaders
                 game.invaders = game.invaders.filter(invader => {
+                    if (invader.isDying) return false; // remove dying ones from array
                     invader.update();
                     if (invader.y >= window.innerHeight + 100) {
+                        // Invader reached bottom - reset combo
+                        resetCombo();
+                        game.missedWords++;
+                        if (invader.element) invader.element.remove();
                         return false;
                     }
                     return true;
@@ -3341,48 +3939,53 @@
                     const intervalMs = 2000; // sample every 2 seconds
                     if (now - game.lastPerformanceCheck >= intervalMs) {
                         const totalTimeMinutes = (now - game.startTime) / 60000;
-                        const totalAttempts = game.correctCharacters + game.incorrectAttempts;
-
-                        const currentWpm = totalTimeMinutes > 0
-                            ? Math.round((game.correctCharacters / 5) / totalTimeMinutes)
-                            : 0;
-                        const currentAccuracy = totalAttempts > 0
-                            ? Math.round((game.correctCharacters / totalAttempts) * 100)
-                            : 0;
-
-                        game.wpmHistory.push(currentWpm);
-                        game.accuracyHistory.push(currentAccuracy);
+                        
+                        if (game.mode === 'math') {
+                            // Math: track SPS and avg solve time
+                            const totalTimeSeconds = (now - game.startTime) / 1000;
+                            const currentSps = totalTimeSeconds > 0
+                                ? (game.mathQuestionsAnswered / totalTimeSeconds)
+                                : 0;
+                            const currentAvgSolve = game.mathQuestionsAnswered > 0
+                                ? (game.totalMathSolveTime / game.mathQuestionsAnswered / 1000)
+                                : 0;
+                            game.spmHistory.push(currentSps);
+                            game.solveTimeHistory.push(currentAvgSolve);
+                        } else {
+                            const totalAttempts = game.correctCharacters + game.incorrectAttempts;
+                            const currentWpm = totalTimeMinutes > 0
+                                ? Math.round((game.correctCharacters / 5) / totalTimeMinutes)
+                                : 0;
+                            const currentAccuracy = totalAttempts > 0
+                                ? Math.round((game.correctCharacters / totalAttempts) * 100)
+                                : 0;
+                            game.wpmHistory.push(currentWpm);
+                            game.accuracyHistory.push(currentAccuracy);
+                        }
                         game.lastPerformanceCheck = now;
                     }
                 }
 
-                // Progressive difficulty - gradually increase speed and spawn rate based on score
-                if (game.score > 0 && game.score % 50 === 0) {
-                    // Gradually increase speed (cap based on difficulty)
-                    const speedCap = {
-                        'easy': 0.8,
-                        'medium': 1.2,
-                        'hard': 1.8,
-                        'superhard': 2.5
-                    };
-                    game.invaderSpeed = Math.min(game.invaderSpeed + 0.05, speedCap[game.difficulty]);
-                    
-                    // Gradually decrease spawn interval (cap based on difficulty)
-                    const intervalCap = {
-                        'easy': 1500,
-                        'medium': 1000,
-                        'hard': 700,
-                        'superhard': 400
-                    };
-                    game.spawnInterval = Math.max(game.spawnInterval - 50, intervalCap[game.difficulty]);
+                // Progressive difficulty - increase speed every 100 points
+                // Only applies in words/sentences modes (not during journey phase transitions)
+                const currentMode = game.mode === 'journey' ? getJourneyPhaseMode() : game.mode;
+                if (game.score > 0 && game.score % 100 === 0 && game.score !== game.lastSpeedIncrease) {
+                    if (currentMode === 'math') {
+                        // Math gets half the speed increase - more time to think
+                        game.invaderSpeed = Math.min(game.invaderSpeed + 0.05, 0.9);
+                    } else if (currentMode !== 'sentences') {
+                        // Words/letters get full speed increase
+                        game.invaderSpeed = Math.min(game.invaderSpeed + 0.1, 1.5);
+                    }
+                    game.lastSpeedIncrease = game.score;
                 }
             }
             
             lastTime = timestamp;
-            requestAnimationFrame(gameLoop);
+            requestAnimationFrame(ts => gameLoop(ts, loopSession));
         }
 
-        // Challenge system functions
+        // Challenge system functions (LEGACY - kept for compatibility)
         function startChallenge() {
             game.isChallenge = true;
             game.isPaused = true;
@@ -3453,7 +4056,7 @@
             challengeScreen.classList.remove('show');
             
             // Restore correct keyboard based on current mode
-            const isMobile = window.matchMedia("(max-width: 768px)").matches;
+            const isMobile = (window.matchMedia("(max-width: 1024px)").matches || window.matchMedia("(pointer: coarse)").matches);
             if (isMobile) {
                 const normalKeyboard = document.getElementById('onScreenKeyboard');
                 const numberKeyboard = document.getElementById('numberKeyboard');
@@ -3494,7 +4097,7 @@
             challengeScreen.classList.remove('show');
             
             // Restore correct keyboard based on current mode
-            const isMobile = window.matchMedia("(max-width: 768px)").matches;
+            const isMobile = (window.matchMedia("(max-width: 1024px)").matches || window.matchMedia("(pointer: coarse)").matches);
             if (isMobile) {
                 const normalKeyboard = document.getElementById('onScreenKeyboard');
                 const numberKeyboard = document.getElementById('numberKeyboard');
@@ -3556,6 +4159,34 @@
             }
         }
 
+        function handleSentenceInput(e) {
+            if (!game.isSentenceActive || !game.currentSentenceText) return;
+            
+            const targetSentence = game.currentSentenceText;
+            
+            if (e.key === 'Backspace') {
+                game.currentInput = game.currentInput.slice(0, -1);
+            } else if (e.key.length === 1) {
+                const nextChar = targetSentence[game.currentInput.length];
+                if (nextChar !== undefined && e.key.toLowerCase() === nextChar.toLowerCase()) {
+                    game.currentInput += nextChar;
+                    game.correctCharacters++;
+                } else if (nextChar !== undefined) {
+                    // Wrong key
+                    game.incorrectAttempts++;
+                    resetCombo();
+                    playErrorSound();
+                }
+            }
+            
+            updateSentenceProgress();
+            
+            // Check completion
+            if (game.currentInput === targetSentence) {
+                completeSentence();
+            }
+        }
+
         // Challenge keyboard event listeners (mobile/tablet)
         const challengeKeys = document.querySelectorAll('.challenge-key');
         challengeKeys.forEach(key => {
@@ -3603,28 +4234,118 @@
             showCelebration();
         }
 
+        // ── Nuclear cleanup: call before every mode/restart transition ──────────
+        function fullCleanup() {
+            // Stop game loop by incrementing sessionId - all pending RAF/setTimeout
+            // callbacks that captured the old id will see the mismatch and bail out.
+            _sessionId++;
+            game.isGameOver = true;
+            game.isPaused   = false;
+
+            // Clear sentence timer
+            if (game.sentenceTimer) {
+                clearInterval(game.sentenceTimer);
+                game.sentenceTimer = null;
+            }
+            game.isSentenceActive  = false;
+            game.currentSentenceText = '';
+            game.currentInput        = '';
+
+            // Kill all invader/bullet DOM elements
+            game.invaders.forEach(z => { try { if (z.element) z.element.remove(); } catch(e){} });
+            game.bullets.forEach(b  => { try { b.remove(); } catch(e){} });
+            game.invaders = [];
+            game.bullets  = [];
+
+            // Nuke any orphaned DOM leftovers
+            document.querySelectorAll('.invader, .bullet').forEach(el => el.remove());
+
+            // Reset sentences overlay completely
+            const overlay = document.getElementById('sentencesOverlay');
+            const box     = document.getElementById('sentencesBox');
+            if (overlay) overlay.classList.remove('show');
+            if (box) {
+                box.classList.remove('animate-in', 'animate-out');
+                // Force reflow so any pending CSS transitions stop
+                void box.offsetWidth;
+            }
+
+            // Reset phase-transition overlay
+            const phaseOverlay = document.getElementById('phaseTransitionOverlay');
+            if (phaseOverlay) {
+                phaseOverlay.style.opacity  = '0';
+                phaseOverlay.style.display  = 'none';
+            }
+
+            // Reset keyboards to default
+            const normalKb = document.getElementById('onScreenKeyboard');
+            const numberKb = document.getElementById('numberKeyboard');
+            if (normalKb) { normalKb.style.display = ''; normalKb.classList.remove('hide-for-challenge'); }
+            if (numberKb) { numberKb.classList.remove('show'); numberKb.style.display = ''; }
+
+            // Reset challenge screen
+            const challengeScreen = document.getElementById('challengeScreen');
+            if (challengeScreen) challengeScreen.classList.remove('show');
+
+            // Reset pause overlay
+            const pauseOverlay = document.getElementById('pauseOverlay');
+            if (pauseOverlay) pauseOverlay.classList.remove('show');
+
+            // Reset input display
+            const inputDisplay = document.getElementById('inputDisplay');
+            if (inputDisplay) { inputDisplay.innerHTML = ''; inputDisplay.classList.remove('active', 'error'); }
+            const mobileIn = document.getElementById('mobileInput');
+            if (mobileIn) mobileIn.value = '';
+
+            // Reset mode flags
+            game.isMathMode         = false;
+            game.isLetterMode       = false;
+            game._phaseTransitioning = false;
+            game.targetInvader      = null;
+        }
+
+        // Speed multiplier setting
+        let speedMultiplier = 1;
+        const speedLevels = [1, 2, 3];
+
+        const speedDisplay = document.getElementById('speedDisplay');
+        speedDisplay.addEventListener('click', () => {
+            // Disabled in sentences mode and journey mode (auto-controlled)
+            const currentMode = game.mode === 'journey' ? getJourneyPhaseMode() : game.mode;
+            if (currentMode === 'sentences' || game.mode === 'journey') return;
+
+            const currentIndex = speedLevels.indexOf(speedMultiplier);
+            speedMultiplier = speedLevels[(currentIndex + 1) % speedLevels.length];
+            speedDisplay.textContent = speedMultiplier + 'x';
+
+            // Apply instantly to all existing invaders
+            game.invaders.forEach(inv => {
+                if (!inv.isDying) {
+                    inv.speedY = game.invaderSpeed * (0.8 + Math.random() * 0.4) * speedMultiplier;
+                }
+            });
+        });
+
+        // Update speed button state based on mode
+        function updateSpeedButtonState() {
+            const currentMode = game.mode === 'journey' ? getJourneyPhaseMode() : game.mode;
+            const disabledModes = currentMode === 'sentences' || game.mode === 'journey';
+            if (disabledModes) {
+                speedDisplay.style.opacity = '0.35';
+                speedDisplay.style.cursor = 'not-allowed';
+                speedDisplay.title = 'Speed controlled automatically in this mode';
+            } else {
+                speedDisplay.style.opacity = '1';
+                speedDisplay.style.cursor = 'pointer';
+                speedDisplay.title = '';
+            }
+        }
+
         // Restart game
         function restartGame() {
-            // Clear invaders and bullets
-            game.invaders.forEach(z => z.element.remove());
-            game.bullets.forEach(b => b.remove());
-            
-            // Reset all mode flags
-            game.isMathMode = false;
-            game.isLetterMode = false;
+            fullCleanup();
             game.completedChallenges = [];
-            
-            // Reset keyboards to default (word keyboard on mobile)
-            const isMobile = window.matchMedia("(max-width: 768px)").matches;
-            if (isMobile) {
-                const normalKeyboard = document.getElementById('onScreenKeyboard');
-                const numberKeyboard = document.getElementById('numberKeyboard');
-                
-                normalKeyboard.style.display = 'flex';
-                normalKeyboard.classList.remove('hide-for-challenge');
-                numberKeyboard.classList.remove('show');
-            }
-            
+
             // Hide game container and show time selection screen
             gameContainer.classList.add('hidden');
             timeSelection.classList.remove('hidden');
@@ -3633,32 +4354,38 @@
         }
 
         // Start game with selected difficulty
-        function startGame(difficulty) {
-            // Difficulty settings
-            const difficultySettings = {
-                'easy': {
+        function startGame(mode) {
+            // Full nuclear cleanup of any previous game session
+            fullCleanup();
+            // Stamp this session so async callbacks from old sessions self-abort
+            _sessionId++;
+            const mySession = _sessionId;
+
+            // Mode settings
+            const modeSettings = {
+                'words': {
                     spawnInterval: 2500,
                     invaderSpeed: 0.3,
-                    maxInvaders: 3
-                },
-                'medium': {
-                    spawnInterval: 1800,
-                    invaderSpeed: 0.5,
                     maxInvaders: 5
                 },
-                'hard': {
-                    spawnInterval: 1200,
-                    invaderSpeed: 0.8,
-                    maxInvaders: 7
+                'sentences': {
+                    spawnInterval: 3000,
+                    invaderSpeed: 0.4,
+                    maxInvaders: 3
                 },
-                'superhard': {
-                    spawnInterval: 800,
-                    invaderSpeed: 1.2,
-                    maxInvaders: 10
+                'math': {
+                    spawnInterval: 2500,
+                    invaderSpeed: 0.35,
+                    maxInvaders: 4
+                },
+                'journey': {
+                    spawnInterval: 2500,
+                    invaderSpeed: 0.3,
+                    maxInvaders: 5
                 }
             };
             
-            const settings = difficultySettings[difficulty];
+            const settings = modeSettings[mode];
             
             // Reset game state
             game.score = 0;
@@ -3669,16 +4396,27 @@
             game.isGameOver = false;
             game.isPaused = false;
             game.lastSpawn = 0;
-            game.difficulty = difficulty;
+            game.mode = mode;
+            game.journeyPhase = 1;
             game.spawnInterval = settings.spawnInterval;
             game.invaderSpeed = settings.invaderSpeed;
             game.maxInvaders = settings.maxInvaders;
+            game.lastSpeedIncrease = 0;
+            
+            // Reset combo system
+            game.consecutiveHits = 0;
+            game.comboMultiplier = 1;
+            updateComboDisplay();
             
             // Reset celebration and stats tracking
             game.celebrationShown = false;
             game.isMathMode = false;
             game.isLetterMode = false;
+            game._phaseTransitioning = false;
             game.completedChallenges = [];
+            // Reset speed multiplier
+            speedMultiplier = (mode === 'journey') ? 2 : 1;
+            speedDisplay.textContent = speedMultiplier + 'x';
             game.startTime = Date.now();
             game.totalCharactersTyped = 0;
             game.correctCharacters = 0;
@@ -3690,6 +4428,16 @@
             game.wpmHistory = [];
             game.accuracyHistory = [];
             game.lastPerformanceCheck = Date.now();
+            game.mathQuestionsAnswered = 0;
+            game.totalMathSolveTime = 0;
+            game.mathQuestionStartTime = null;
+            game.spmHistory = [];
+            game.solveTimeHistory = [];
+            game.isSentenceActive = false;
+            game.sentenceTimer = null;
+            game.sentenceTimeLeft = 30;
+            game.currentSentenceIndex = 0;
+            game.usedSentences = [];
             
             // Clear mobile input value
             mobileInput.value = '';
@@ -3697,13 +4445,16 @@
             // Reset UI
             scoreValue.textContent = '0';
             scoreValue.classList.remove('score-increase', 'score-decrease');
-            const difficultyNames = {
-                'easy': 'Easy',
-                'medium': 'Medium', 
-                'hard': 'Hard',
-                'superhard': 'Superb'
+            const modeNames = {
+                'words': 'Words',
+                'sentences': 'Sentences', 
+                'math': 'Math',
+                'journey': 'Journey'
             };
-            difficultyDisplay.textContent = difficultyNames[difficulty];
+            difficultyDisplay.textContent = modeNames[mode];
+            
+            // Update speed button state for the selected mode
+            updateSpeedButtonState();
             
             // Set pause button icon
             const pauseIcon = pauseBtn.querySelector('.material-symbols-outlined');
@@ -3718,17 +4469,22 @@
             
             // Focus mobile input only on mobile/tablet devices
             // Desktop will use document keydown listener directly
-            const isMobile = window.matchMedia("(max-width: 768px)").matches;
+            const isMobile = (window.matchMedia("(max-width: 1024px)").matches || window.matchMedia("(pointer: coarse)").matches);
             if (isMobile) {
                 // Always clear any inline display styles left over from a previous session
-                // (math mode, celebration hide, or challenge hide all set style.display directly
-                // which overrides the CSS media query and causes the keyboard to stay invisible).
                 const normalKeyboard = document.getElementById('onScreenKeyboard');
                 const numberKeyboard = document.getElementById('numberKeyboard');
-                normalKeyboard.style.display = '';       // remove inline → CSS media query shows it
-                normalKeyboard.classList.remove('hide-for-challenge');
-                numberKeyboard.style.display = '';       // remove inline → stays hidden via CSS
-                numberKeyboard.classList.remove('show'); // only re-added when math mode activates
+                
+                // For math mode, show number keyboard immediately
+                if (mode === 'math') {
+                    normalKeyboard.style.display = 'none';
+                    numberKeyboard.classList.add('show');
+                } else {
+                    normalKeyboard.style.display = '';
+                    normalKeyboard.classList.remove('hide-for-challenge');
+                    numberKeyboard.style.display = '';
+                    numberKeyboard.classList.remove('show');
+                }
 
                 // Mobile - use the hidden input to capture keyboard
                 requestAnimationFrame(() => {
@@ -3743,9 +4499,9 @@
                 gameContainer.focus();
             }
             
-            // Restart game loop
+            // Restart game loop, tagged with this session id
             lastTime = performance.now();
-            requestAnimationFrame(gameLoop);
+            requestAnimationFrame(ts => gameLoop(ts, mySession));
         }
 
         // Pause microcopy messages
@@ -3760,41 +4516,16 @@
         // Toggle pause
         // Show celebration screen at score 1000
         function showCelebration() {
+            // Stop everything cleanly
+            fullCleanup();
             game.isPaused = true;
-            game.isGameOver = true; // Stop the game loop
-            
+
             // Hide the game container
             document.getElementById('gameContainer').classList.add('hidden');
-            
-            // Clear all invaders and bullets
-            game.invaders.forEach(inv => {
-                if (inv.element) inv.element.remove();
-            });
-            game.bullets.forEach(bullet => {
-                if (bullet.element) bullet.element.remove();
-            });
-            game.invaders = [];
-            game.bullets = [];
             
             // Calculate stats
             const totalTimeSeconds = (Date.now() - game.startTime) / 1000;
             const totalTimeMinutes = totalTimeSeconds / 60;
-            
-            // WPM calculation (assuming average 5 characters per word)
-            const wordsTyped = game.correctCharacters / 5;
-            const wpm = Math.round(wordsTyped / totalTimeMinutes);
-            
-            // Accuracy calculation
-            const totalAttempts = game.correctCharacters + game.incorrectAttempts;
-            const accuracy = totalAttempts > 0 ? Math.round((game.correctCharacters / totalAttempts) * 100) : 0;
-            
-            // Determine player rank based on WPM and Accuracy
-            let rank = 'NOOB';
-            if (wpm >= 40 && accuracy >= 85) {
-                rank = 'PRO';
-            } else if (wpm >= 25 && accuracy >= 70) {
-                rank = 'BASIC';
-            }
             
             // Reusable countdown animation function
             const animateValue = (elementId, finalValue, duration = 2000, suffix = '') => {
@@ -3803,7 +4534,6 @@
                 const steps = 60;
                 const increment = finalValue / steps;
                 const stepDuration = duration / steps;
-                
                 const countInterval = setInterval(() => {
                     currentValue += increment;
                     if (currentValue >= finalValue) {
@@ -3814,15 +4544,106 @@
                 }, stepDuration);
             };
             
-            // Update celebration screen with countdown animations
-            document.getElementById('playerRank').textContent = rank;
+            const isMathModeGame = game.mode === 'math';
             
-            // Animate all numeric values
-            animateValue('celebrationScoreValue', game.score, 2000, '');
-            animateValue('celebrationWpm', wpm, 2000, '');
-            animateValue('celebrationAccuracy', accuracy, 2000, '%');
-            animateValue('celebrationIncorrect', game.incorrectAttempts, 2000, '');
-            animateValue('celebrationMissed', game.missedWords, 2000, '');
+            if (isMathModeGame) {
+                // Math mode stats
+                // SPS = solved per second
+                const questionsAnswered = game.mathQuestionsAnswered || 0;
+                const sps = totalTimeSeconds > 0 ? (questionsAnswered / totalTimeSeconds).toFixed(2) : '0.00';
+                const spsNum = parseFloat(sps);
+                
+                // Avg solve time in seconds
+                const avgSolveTime = questionsAnswered > 0
+                    ? ((game.totalMathSolveTime || 0) / questionsAnswered / 1000).toFixed(1)
+                    : 0;
+                
+                // Wrong answers count
+                const wrongAnswers = game.incorrectAttempts;
+                
+                // Determine rank based on score
+                let rank;
+                const s = game.score;
+                if (s >= 900)      rank = 'OTAI';
+                else if (s >= 800) rank = 'LEGEND';
+                else if (s >= 700) rank = 'JAGUH';
+                else if (s >= 600) rank = 'ELITE';
+                else if (s >= 500) rank = 'GEMPAK';
+                else if (s >= 400) rank = 'WIRA';
+                else if (s >= 300) rank = 'POWER';
+                else if (s >= 200) rank = 'BLUR';
+                else if (s >= 100) rank = 'MEH';
+                else               rank = 'NOOB';
+                
+                document.getElementById('playerRank').textContent = rank;
+                
+                // Update labels for math mode
+                document.getElementById('celebrationWpmLabel').textContent = 'SPS';
+                document.getElementById('celebrationAccuracyLabel').textContent = 'AVG SOLVE';
+                document.getElementById('celebrationIncorrectLabel').textContent = 'Wrong answers';
+                
+                animateValue('celebrationScoreValue', game.score, 2000, '');
+                // SPS shown with 2 decimal places - animate numerically then format
+                const spsEl = document.getElementById('celebrationWpm');
+                let spsAnim = 0;
+                const spsSteps = 60;
+                const spsInc = spsNum / spsSteps;
+                const spsInterval = setInterval(() => {
+                    spsAnim += spsInc;
+                    if (spsAnim >= spsNum) { spsAnim = spsNum; clearInterval(spsInterval); }
+                    spsEl.textContent = spsAnim.toFixed(2);
+                }, 2000 / spsSteps);
+                // Avg solve time - show as seconds
+                document.getElementById('celebrationAccuracy').textContent = avgSolveTime + 's';
+                document.getElementById('celebrationAccuracy').style.color = '#10b981';
+                document.getElementById('celebrationAccuracy').style.textShadow = '0 0 6px rgba(16, 185, 129, 0.2)';
+                animateValue('celebrationIncorrect', wrongAnswers, 2000, '');
+                animateValue('celebrationMissed', game.missedWords, 2000, '');
+                
+                // Graph: SPS over time vs avgSolveTime
+                game._mathGraphMode = true;
+                
+            } else {
+                // WPM calculation (assuming average 5 characters per word)
+                const wordsTyped = game.correctCharacters / 5;
+                const wpm = Math.round(wordsTyped / totalTimeMinutes);
+                
+                // Accuracy calculation
+                const totalAttempts = game.correctCharacters + game.incorrectAttempts;
+                const accuracy = totalAttempts > 0 ? Math.round((game.correctCharacters / totalAttempts) * 100) : 0;
+                
+                // Determine player rank based on score
+                let rank;
+                const s = game.score;
+                if (s >= 900)      rank = 'OTAI';
+                else if (s >= 800) rank = 'LEGEND';
+                else if (s >= 700) rank = 'JAGUH';
+                else if (s >= 600) rank = 'ELITE';
+                else if (s >= 500) rank = 'GEMPAK';
+                else if (s >= 400) rank = 'WIRA';
+                else if (s >= 300) rank = 'POWER';
+                else if (s >= 200) rank = 'BLUR';
+                else if (s >= 100) rank = 'MEH';
+                else               rank = 'NOOB';
+                
+                document.getElementById('playerRank').textContent = rank;
+                
+                // Reset labels for non-math mode
+                document.getElementById('celebrationWpmLabel').textContent = 'WPM';
+                document.getElementById('celebrationAccuracyLabel').textContent = 'ACCURACY';
+                document.getElementById('celebrationIncorrectLabel').textContent = 'Incorrect attempts';
+                document.getElementById('celebrationAccuracy').style.color = '';
+                document.getElementById('celebrationAccuracy').style.textShadow = '';
+                
+                game._mathGraphMode = false;
+                
+                // Animate all numeric values
+                animateValue('celebrationScoreValue', game.score, 2000, '');
+                animateValue('celebrationWpm', wpm, 2000, '');
+                animateValue('celebrationAccuracy', accuracy, 2000, '%');
+                animateValue('celebrationIncorrect', game.incorrectAttempts, 2000, '');
+                animateValue('celebrationMissed', game.missedWords, 2000, '');
+            }
             
             // Update graph time labels with actual clock times
             const startDate = new Date(game.startTime);
@@ -3844,8 +4665,18 @@
             document.getElementById('graphCenterTime').textContent = durationLabel;
             document.getElementById('graphEndTime').textContent = formatTime(endDate);
             
+            // Update graph legend labels based on mode
+            const graphLegend = document.getElementById('graphLegend');
+            if (graphLegend) {
+                if (isMathModeGame) {
+                    graphLegend.innerHTML = '<span style="color:#FFD400">■ SPS</span> &nbsp; <span style="color:#10b981">■ Avg Solve Time</span>';
+                } else {
+                    graphLegend.innerHTML = '<span style="color:#FFD400">■ WPM</span> &nbsp; <span style="color:#10b981">■ Accuracy</span>';
+                }
+            }
+            
             // Hide keyboard on mobile/tablet
-            const isMobile = window.matchMedia("(max-width: 768px)").matches;
+            const isMobile = (window.matchMedia("(max-width: 1024px)").matches || window.matchMedia("(pointer: coarse)").matches);
             if (isMobile) {
                 document.getElementById('onScreenKeyboard').style.display = 'none';
                 document.getElementById('numberKeyboard').classList.remove('show');
@@ -3897,43 +4728,61 @@
             // Clear canvas (transparent background)
             ctx.clearRect(0, 0, width, height);
             
-            // Start from actual performance history
-            let wpmData = game.wpmHistory.slice();
-            let accuracyData = game.accuracyHistory.slice();
+            const isMathGraph = game._mathGraphMode;
             
-            // If we don't have enough real data points yet, synthesize a flat line
-            // from the final real WPM and accuracy so the graph is never empty.
-            if (wpmData.length < 2 || accuracyData.length < 2) {
-                const totalTimeMinutes = (Date.now() - game.startTime) / 60000;
-                const finalWpm = totalTimeMinutes > 0
-                    ? Math.round((game.correctCharacters / 5) / totalTimeMinutes)
-                    : 0;
-                const totalAttempts = game.correctCharacters + game.incorrectAttempts;
-                const finalAccuracy = totalAttempts > 0
-                    ? Math.round((game.correctCharacters / totalAttempts) * 100)
-                    : 0;
+            let primaryData, secondaryData;
+            
+            if (isMathGraph) {
+                // Math mode: SPM (yellow) vs Avg Solve Time (green)
+                primaryData = game.spmHistory.slice();
+                secondaryData = game.solveTimeHistory.slice();
                 
-                wpmData = [finalWpm, finalWpm];
-                accuracyData = [finalAccuracy, finalAccuracy];
+                if (primaryData.length < 2 || secondaryData.length < 2) {
+                    const totalTimeMinutes = (Date.now() - game.startTime) / 60000;
+                    const questionsAnswered = game.mathQuestionsAnswered || 0;
+                    const finalSpm = totalTimeMinutes > 0 ? Math.round(questionsAnswered / totalTimeMinutes) : 0;
+                    const finalAvgSolve = questionsAnswered > 0
+                        ? (game.totalMathSolveTime / questionsAnswered / 1000)
+                        : 0;
+                    primaryData = [finalSpm, finalSpm];
+                    secondaryData = [finalAvgSolve, finalAvgSolve];
+                }
+            } else {
+                // Start from actual performance history
+                primaryData = game.wpmHistory.slice();
+                secondaryData = game.accuracyHistory.slice();
+                
+                // If we don't have enough real data points yet, synthesize a flat line
+                if (primaryData.length < 2 || secondaryData.length < 2) {
+                    const totalTimeMinutes = (Date.now() - game.startTime) / 60000;
+                    const finalWpm = totalTimeMinutes > 0
+                        ? Math.round((game.correctCharacters / 5) / totalTimeMinutes)
+                        : 0;
+                    const totalAttempts = game.correctCharacters + game.incorrectAttempts;
+                    const finalAccuracy = totalAttempts > 0
+                        ? Math.round((game.correctCharacters / totalAttempts) * 100)
+                        : 0;
+                    
+                    primaryData = [finalWpm, finalWpm];
+                    secondaryData = [finalAccuracy, finalAccuracy];
+                }
             }
             
-            const points = wpmData.length;
+            const points = primaryData.length;
             const padding = 0;
             const graphWidth = width - padding * 2;
             const graphHeight = height - 40; // Bottom padding for labels
             
-            // Normalize WPM against a realistic max ceiling so the line
-            // uses the full vertical space meaningfully (e.g. 80 WPM)
+            // Normalize values
             const MAX_WPM = 80;
+            const MAX_SPS = 1.0;   // 1 solve per second is very fast
+            const MAX_SOLVE_TIME = 15; // 15 seconds max solve time
             
             // Create paths for both lines
-            const accuracyPath = [];
-            const wpmPath = [];
+            const secondaryPath = [];
+            const primaryPath = [];
             
-            // Helper to make WPM ups/downs more dramatic around the midline.
-            // v in [0,1] -> 0.5 + (v-0.5)*2 (clamped), which doubles distance
-            // from 0.5 so highs are higher and lows are lower visually.
-            const exaggerateWpm = (v) => {
+            const exaggerate = (v) => {
                 const exaggerated = 0.5 + (v - 0.5) * 2;
                 return Math.max(0, Math.min(1, exaggerated));
             };
@@ -3941,20 +4790,34 @@
             for (let i = 0; i < points; i++) {
                 const x = padding + (i / (points - 1)) * graphWidth;
                 
-                // Keep accuracy linear so small changes remain visible
-                let accValue = accuracyData[i] / 100;
-                const accY = height - (accValue * graphHeight);
-                accuracyPath.push({ x, y: accY });
-                
-                let wpmValue = Math.min(wpmData[i] / MAX_WPM, 1);
-                wpmValue = exaggerateWpm(wpmValue);
-                const wpmY = height - (wpmValue * graphHeight);
-                wpmPath.push({ x, y: wpmY });
+                if (isMathGraph) {
+                    // Secondary = solve time (green) - lower is better, so invert
+                    let solveValue = Math.min(secondaryData[i] / MAX_SOLVE_TIME, 1);
+                    solveValue = 1 - solveValue; // Invert so lower solve time = higher on graph
+                    const secY = height - (solveValue * graphHeight);
+                    secondaryPath.push({ x, y: secY });
+                    
+                    // Primary = SPS (yellow)
+                    let spsValue = Math.min(primaryData[i] / MAX_SPS, 1);
+                    spsValue = exaggerate(spsValue);
+                    const primY = height - (spsValue * graphHeight);
+                    primaryPath.push({ x, y: primY });
+                } else {
+                    // Secondary = accuracy (green)
+                    let accValue = secondaryData[i] / 100;
+                    const accY = height - (accValue * graphHeight);
+                    secondaryPath.push({ x, y: accY });
+                    
+                    // Primary = WPM (yellow)
+                    let wpmValue = Math.min(primaryData[i] / MAX_WPM, 1);
+                    wpmValue = exaggerate(wpmValue);
+                    const wpmY = height - (wpmValue * graphHeight);
+                    primaryPath.push({ x, y: wpmY });
+                }
             }
             
-            // Animation setup - no delay
-            const animationDuration = 2000; // 2 seconds
-            
+            // Animation setup
+            const animationDuration = 2000;
             const startTime = Date.now();
             
             function animate() {
@@ -3964,19 +4827,17 @@
                 // Clear canvas
                 ctx.clearRect(0, 0, width, height);
                 
-                // Draw Accuracy (green) - back layer (area + line)
-                drawAnimatedPath(ctx, accuracyPath, progress, '#10b981', 'rgba(16, 185, 129, 0.7)', 'rgba(16, 185, 129, 0.2)', height);
+                // Draw secondary line (green) - back layer
+                drawAnimatedPath(ctx, secondaryPath, progress, '#10b981', 'rgba(16, 185, 129, 0.7)', 'rgba(16, 185, 129, 0.2)', height);
                 
-                // Draw WPM (yellow) - front layer (area + bold line), similar to accuracy
-                drawAnimatedPath(ctx, wpmPath, progress, '#FFD400', 'rgba(255, 212, 0, 0.5)', 'rgba(255, 212, 0, 0.1)', height);
+                // Draw primary line (yellow) - front layer
+                drawAnimatedPath(ctx, primaryPath, progress, '#FFD400', 'rgba(255, 212, 0, 0.5)', 'rgba(255, 212, 0, 0.1)', height);
                 
-                // Continue animation if not complete
                 if (progress < 1) {
                     requestAnimationFrame(animate);
                 }
             }
             
-            // Start animation immediately
             animate();
         }
         
@@ -4078,19 +4939,14 @@
                     maxInvaders: 3
                 },
                 'medium': {
-                    spawnInterval: 1800,
-                    invaderSpeed: 0.5,
+                    spawnInterval: 2000,
+                    invaderSpeed: 0.3,
                     maxInvaders: 5
                 },
                 'hard': {
-                    spawnInterval: 1200,
-                    invaderSpeed: 0.8,
-                    maxInvaders: 7
-                },
-                'superhard': {
-                    spawnInterval: 800,
-                    invaderSpeed: 1.2,
-                    maxInvaders: 10
+                    spawnInterval: 1500,
+                    invaderSpeed: 0.3,
+                    maxInvaders: 8
                 }
             };
             
@@ -4140,7 +4996,7 @@ Play now at: ${window.location.href}`;
             timeSelection.classList.remove('hidden');
             
             // Clear invaders and bullets
-            game.invaders.forEach(z => z.element.remove());
+            game.invaders.forEach(z => z.element && z.element.remove());
             game.bullets.forEach(b => b.remove());
             game.invaders = [];
             game.bullets = [];
@@ -4176,86 +5032,41 @@ Play now at: ${window.location.href}`;
         
         // Restart button during game - restarts immediately with same difficulty
         restartGameBtn.addEventListener('click', () => {
-            const currentDifficulty = game.difficulty;
-            
-            // Clear invaders and bullets
-            game.invaders.forEach(z => z.element.remove());
-            game.bullets.forEach(b => b.remove());
-            
-            // Restart with same difficulty
-            startGame(currentDifficulty);
+            const currentMode = game.mode;
+            // fullCleanup is called inside startGame, but capture mode first
+            startGame(currentMode);
         });
         
         // Home button - return to main menu
         const homeBtn = document.getElementById('homeBtn');
         homeBtn.addEventListener('click', () => {
-            // Clear invaders and bullets
-            game.invaders.forEach(z => z.element.remove());
-            game.bullets.forEach(b => b.remove());
-            game.invaders = [];
-            game.bullets = [];
-            
+            fullCleanup();
+            game.completedChallenges = [];
+
             // Hide game container and show time selection
             gameContainer.classList.add('hidden');
             topbar.classList.remove('show');
             timeSelection.classList.remove('hidden');
-            
-            // Reset game state
-            game.isGameOver = false;
-            game.isPaused = false;
         });
         
-        // Difficulty display click to cycle through levels
-        difficultyDisplay.addEventListener('click', () => {
-            const difficultyOrder = ['easy', 'medium', 'hard', 'superhard'];
-            const currentIndex = difficultyOrder.indexOf(game.difficulty);
-            const nextIndex = (currentIndex + 1) % difficultyOrder.length;
-            const nextDifficulty = difficultyOrder[nextIndex];
-            
-            applyDifficultySettings(nextDifficulty);
-            
-            const difficultyNames = {
-                'easy': 'Easy',
-                'medium': 'Medium',
-                'hard': 'Hard',
-                'superhard': 'Superb'
-            };
-            difficultyDisplay.textContent = difficultyNames[nextDifficulty];
-        });
+        // difficultyDisplay is read-only - shows current mode name, not clickable
         
-        // Category cycling
-        categoryDisplay.addEventListener('click', () => {
-            const categoryOrder = ['all', 'animals', 'plants', 'science', 'genz'];
-            const currentIndex = categoryOrder.indexOf(currentCategory);
-            const nextIndex = (currentIndex + 1) % categoryOrder.length;
-            currentCategory = categoryOrder[nextIndex];
-            
-            // Update word list
-            words = wordCategories[currentCategory];
-            
-            const categoryNames = {
-                'all': 'All',
-                'animals': 'Animals',
-                'plants': 'Plants',
-                'science': 'Science',
-                'genz': 'Gen Z'
-            };
-            categoryDisplay.textContent = categoryNames[currentCategory];
-        });
+        // Category cycling (categoryDisplay removed from UI, kept for internal state)
+        // categoryDisplay.addEventListener removed
         
-        // Difficulty option selection on start screen - starts game immediately
+        // Mode option selection on start screen - starts game immediately
         const difficultyOptions = document.querySelectorAll('.difficulty-option');
         difficultyOptions.forEach(option => {
             option.addEventListener('click', () => {
-                const difficulty = option.getAttribute('data-difficulty');
-                const isMobile = window.matchMedia("(max-width: 768px)").matches;
+                const mode = option.getAttribute('data-mode');
+                const isMobile = (window.matchMedia("(max-width: 1024px)").matches || window.matchMedia("(pointer: coarse)").matches);
                 // Focus mobile input immediately on user interaction (mobile only)
                 if (isMobile) {
                     mobileInput.focus();
                 }
                 // Small delay to ensure focus has taken effect
                 setTimeout(() => {
-                    startGame(difficulty);
+                    startGame(mode);
                 }, 50);
             });
         });
@@ -4268,7 +5079,7 @@ Play now at: ${window.location.href}`;
                 return;
             }
             
-            const isMobile = window.matchMedia("(max-width: 768px)").matches;
+            const isMobile = (window.matchMedia("(max-width: 1024px)").matches || window.matchMedia("(pointer: coarse)").matches);
             
             if (!game.isGameOver) {
                 // Toggle pause on click/tap
@@ -4353,171 +5164,167 @@ Play now at: ${window.location.href}`;
             }
         }
 
+        // ── Shared math key handler (desktop keydown + mobile number pad) ────────
+        function _handleMathKey(digit) {
+            const newInput = game.currentInput + digit;
+            game.totalCharactersTyped++;
+            if (!game.wordStartTime) game.wordStartTime = Date.now();
+
+            // Exact match → auto-shoot immediately
+            const mathInvader = game.invaders.find(z => !z.isDying && z.word === newInput);
+            if (mathInvader) {
+                playSuccessSound();
+                mathInvader.wordElement.classList.add('typing');
+                mathInvader.wordElement.style.setProperty('--progress', '110%');
+                mathInvader.isDying = true;
+                const travelTime = shoot(mathInvader);
+                setTimeout(() => {
+                    mathInvader.element.classList.add('dying');
+                    setTimeout(() => { mathInvader.element.remove(); }, 500);
+                }, travelTime);
+                updateScore(mathInvader.word, mathInvader);
+                if (mathInvader.isMathQuestion) {
+                    if (game.mathQuestionStartTime) {
+                        game.totalMathSolveTime += Date.now() - game.mathQuestionStartTime;
+                        game.mathQuestionsAnswered++;
+                        game.mathQuestionStartTime = null;
+                    }
+                    const _sid = _sessionId;
+                    setTimeout(() => {
+                        if (_sessionId !== _sid || game.isGameOver) return;
+                        spawnMathInvader();
+                    }, travelTime + 500);
+                }
+                game.currentInput = '';
+                mobileInput.value = '';
+                game.targetInvader = null;
+                game.wordStartTime = null;
+                rotateRocketToTarget(null);
+                updateWordProgress();
+                updateInputDisplay();
+                updateKeyboardHighlight();
+                return;
+            }
+
+            // Accumulate digit
+            game.currentInput = newInput;
+            mobileInput.value = newInput;
+
+            // If typed as many digits as the answer length → wrong answer, reset
+            const activeInvader = game.invaders.find(z => !z.isDying && z.isMathQuestion);
+            if (activeInvader && newInput.length >= activeInvader.word.length) {
+                game.incorrectAttempts++;
+                resetCombo();
+                playErrorSound();
+                game.currentInput = '';
+                mobileInput.value = '';
+                game.wordStartTime = null;
+            }
+
+            // Aim rocket at active math invader
+            const aimTarget = game.invaders.find(z => !z.isDying);
+            game.targetInvader = aimTarget || null;
+            rotateRocketToTarget(game.targetInvader);
+            updateWordProgress();
+            updateInputDisplay();
+            updateKeyboardHighlight();
+        }
+
+        // ── Shared word/letter key handler (desktop keydown + mobile keyboard) ─
+        function _handleWordKey(char) {
+            const newInput = game.currentInput + char;
+            game.totalCharactersTyped++;
+
+            // Prefix check
+            const hasMatch = game.invaders.some(inv => !inv.isDying && inv.word.startsWith(newInput));
+
+            if (!hasMatch) {
+                game.incorrectAttempts++;
+                resetCombo();
+                playErrorSound();
+                game.currentInput = '';
+                mobileInput.value = '';
+                game.targetInvader = null;
+                rotateRocketToTarget(null);
+                updateWordProgress();
+                updateInputDisplay();
+                updateKeyboardHighlight();
+                game.invaders.forEach(z => {
+                    if (!z.isDying && z.wordElement) z.wordElement.classList.remove('typing');
+                });
+                return;
+            }
+
+            // Correct character
+            game.correctCharacters++;
+            if (!game.wordStartTime) game.wordStartTime = Date.now();
+            game.currentInput = newInput;
+            mobileInput.value = newInput;
+
+            // Exact match → shoot
+            const matchedInvader = game.invaders.find(z => !z.isDying && z.word === newInput);
+            if (matchedInvader) {
+                if (game.wordStartTime) {
+                    const wt = Date.now() - game.wordStartTime;
+                    if (!game.fastestWordTime || wt < game.fastestWordTime) game.fastestWordTime = wt;
+                    game.wordStartTime = null;
+                }
+                playSuccessSound();
+                matchedInvader.wordElement.classList.add('typing');
+                matchedInvader.wordElement.style.setProperty('--progress', '110%');
+                matchedInvader.isDying = true;
+                const travelTime = shoot(matchedInvader);
+                setTimeout(() => {
+                    matchedInvader.element.classList.add('dying');
+                    setTimeout(() => { matchedInvader.element.remove(); }, 500);
+                }, travelTime);
+                updateScore(matchedInvader.word, matchedInvader);
+                game.currentInput = '';
+                mobileInput.value = '';
+                game.targetInvader = null;
+                rotateRocketToTarget(null);
+                updateWordProgress();
+                updateInputDisplay();
+                updateKeyboardHighlight();
+                game.invaders.forEach(z => {
+                    if (!z.isDying && z.wordElement) z.wordElement.classList.remove('typing');
+                });
+                return;
+            }
+
+            // Partial match — update target tracking
+            let targetInvader = null;
+            game.invaders.forEach(invader => {
+                if (invader.isDying || !invader.wordElement) return;
+                if (!targetInvader && invader.word.startsWith(newInput)) targetInvader = invader;
+                invader.wordElement.classList.remove('typing');
+            });
+            game.targetInvader = targetInvader;
+            rotateRocketToTarget(targetInvader);
+            updateWordProgress();
+            updateInputDisplay();
+            updateKeyboardHighlight();
+        }
+
         // Function to handle key presses (for both keyboard and on-screen keyboard)
         function handleKeyPress(keyValue) {
             if (game.isGameOver || game.isPaused) return;
-            
+
+            const _mode = game.mode === 'journey' ? getJourneyPhaseMode() : game.mode;
+            const _isMath = _mode === 'math' || game.isMathMode;
+
             if (keyValue === 'Backspace') {
                 game.currentInput = game.currentInput.slice(0, -1);
                 mobileInput.value = game.currentInput;
-                
-                // Update target after backspace
-                if (game.currentInput.length > 0) {
-                    let foundMatch = false;
-                    let targetInvader = null;
-                    
-                    game.invaders.forEach(invader => {
-                        if (invader.isDying || !invader.wordElement) return;
-                        
-                        if (invader.word.startsWith(game.currentInput)) {
-                            if (!foundMatch) {
-                                foundMatch = true;
-                                targetInvader = invader;
-                            }
-                        }
-                    });
-                    
-                    game.targetInvader = targetInvader;
-                    rotateRocketToTarget(targetInvader);
-                } else {
-                    game.targetInvader = null;
-                    rotateRocketToTarget(null);
-                }
-                
                 updateWordProgress();
                 updateInputDisplay();
                 updateKeyboardHighlight();
-            } else if (keyValue.length === 1) {
-                const newInput = game.currentInput + keyValue.toLowerCase();
-                
-                // Check if any invader word starts with this input
-                const hasMatch = game.invaders.some(
-                    inv => !inv.isDying && inv.word.startsWith(newInput)
-                );
-                
-                // Track every character attempt
-                game.totalCharactersTyped++;
-                
-                if (!hasMatch) {
-                    // Track incorrect attempt
-                    game.incorrectAttempts++;
-                    // Play error sound and reset input completely
-                    playErrorSound();
-                    game.currentInput = '';
-                    mobileInput.value = '';
-                    game.targetInvader = null;
-                    rotateRocketToTarget(null);
-                    updateWordProgress();
-                    updateInputDisplay();
-                    updateKeyboardHighlight();
-                    
-                    // Clear all highlights
-                    game.invaders.forEach(z => {
-                        if (!z.isDying && z.wordElement) {
-                            z.wordElement.classList.remove('typing');
-                        }
-                    });
-                    return;
-                }
-                
-                // Track correct character
-                game.correctCharacters++;
-                
-                // Start word timer if this is the first character of a new word
-                if (game.currentInput === '' || !game.wordStartTime) {
-                    game.wordStartTime = Date.now();
-                }
-                
-                game.currentInput = newInput;
-                mobileInput.value = newInput;
-                
-                // Check for complete match
-                const matchedInvader = game.invaders.find(
-                    z => !z.isDying && z.word === game.currentInput
-                );
-                
-                if (matchedInvader) {
-                    // Track fastest word time
-                    if (game.wordStartTime) {
-                        const wordTime = Date.now() - game.wordStartTime;
-                        if (!game.fastestWordTime || wordTime < game.fastestWordTime) {
-                            game.fastestWordTime = wordTime;
-                        }
-                        game.wordStartTime = null;
-                    }
-                    
-                    // Play success sound
-                    playSuccessSound();
-                    
-                    // Turn green only on completion
-                    matchedInvader.wordElement.classList.add('typing');
-                    matchedInvader.wordElement.style.setProperty('--progress', '110%');
-                    
-                    // Mark as dying immediately to protect the typing class
-                    matchedInvader.isDying = true;
-                    
-                    // Shoot and get travel time
-                    const travelTime = shoot(matchedInvader);
-                    
-                    // Delay invader death animation until laser hits
-                    setTimeout(() => {
-                        matchedInvader.element.classList.add('dying');
-                        setTimeout(() => {
-                            matchedInvader.element.remove();
-                        }, 500);
-                    }, travelTime);
-                    
-                    updateScore(matchedInvader.word, matchedInvader);
-                    
-                    // In math mode, spawn new question after answering correctly
-                    if (game.isMathMode && matchedInvader.isMathQuestion) {
-                        setTimeout(() => {
-                            spawnMathInvader();
-                        }, travelTime + 500);
-                    }
-                    
-                    game.currentInput = '';
-                    mobileInput.value = '';
-                    game.targetInvader = null;
-                    rotateRocketToTarget(null);
-                    updateWordProgress();
-                    updateInputDisplay();
-                    updateKeyboardHighlight();
-                    
-                    // Clear all highlights
-                    game.invaders.forEach(z => {
-                        if (!z.isDying && z.wordElement) {
-                            z.wordElement.classList.remove('typing');
-                        }
-                    });
-                    return;
-                }
-                
-                // Update target tracking
-                let foundMatch = false;
-                let targetInvader = null;
-                
-                game.invaders.forEach(invader => {
-                    if (invader.isDying || !invader.wordElement) return;
-                    
-                    if (game.currentInput && invader.word.startsWith(game.currentInput)) {
-                        if (!foundMatch) {
-                            foundMatch = true;
-                            targetInvader = invader;
-                        }
-                    }
-                    
-                    invader.wordElement.classList.remove('typing');
-                });
-                
-                // Update word progress (character-level green)
-                updateWordProgress();
-                
-                // Store target and rotate rocket
-                game.targetInvader = targetInvader;
-                rotateRocketToTarget(targetInvader);
-                updateInputDisplay();
-                updateKeyboardHighlight();
+
+            } else if (_isMath && /^[0-9]$/.test(keyValue)) {
+                _handleMathKey(keyValue);
+
+            } else if (!_isMath && keyValue.length === 1) {
+                _handleWordKey(keyValue.toLowerCase());
             }
         }
 
@@ -4553,7 +5360,7 @@ Play now at: ${window.location.href}`;
                 // Show default top bar again
                 document.getElementById('topbar').classList.add('show');
                 // Show keyboard again on mobile if it was hidden
-                const isMobile = window.matchMedia("(max-width: 768px)").matches;
+                const isMobile = (window.matchMedia("(max-width: 1024px)").matches || window.matchMedia("(pointer: coarse)").matches);
                 if (isMobile && !game.isMathMode) {
                     document.getElementById('onScreenKeyboard').style.display = 'flex';
                 }
@@ -4584,7 +5391,7 @@ Play now at: ${window.location.href}`;
             
             // Auto-start game if not started
             if (!game.isGameOver && gameContainer.classList.contains('hidden')) {
-                startGame('easy');
+                startGame('words');
             }
             
             // Monitor score changes and log mode transitions
@@ -4633,6 +5440,23 @@ Play now at: ${window.location.href}`;
                 
                 if (game.isPaused || game.isChallenge) return;
                 
+                // Handle sentences mode auto-typing (direct sentences mode OR journey sentences phase)
+                const autoCurrentMode = game.mode === 'journey' ? getJourneyPhaseMode() : game.mode;
+                if (autoCurrentMode === 'sentences' && game.isSentenceActive && game.currentSentenceText) {
+                    const targetSentence = game.currentSentenceText;
+                    const remaining = targetSentence.slice(game.currentInput.length);
+                    if (remaining.length > 0) {
+                        const char = remaining[0];
+                        const event = new KeyboardEvent('keydown', {
+                            key: char,
+                            code: char === ' ' ? 'Space' : `Key${char.toUpperCase()}`,
+                            bubbles: true
+                        });
+                        document.dispatchEvent(event);
+                    }
+                    return;
+                }
+                
                 // Find a target invader
                 const activeInvaders = game.invaders.filter(inv => !inv.isDying);
                 
@@ -4660,7 +5484,7 @@ Play now at: ${window.location.href}`;
                         }, i * 30); // 30ms between characters
                     }
                 }
-            }, 200); // Check for new targets every 200ms
+            }, 100); // faster polling for sentences mode
         }
         
         function stopAutoTest() {
