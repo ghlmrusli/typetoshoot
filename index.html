@@ -402,6 +402,16 @@
             background: rgba(16, 185, 129, 0.5);
             transform: scale(0.95);
         }
+
+        .key-space {
+            width: 100%;
+            font-size: 12px;
+            letter-spacing: 2px;
+        }
+
+        #spacebarRow {
+            width: 100%;
+        }
         
         .key.pressed {
             background: rgba(255, 215, 0, 0.7) !important;
@@ -455,9 +465,23 @@
             .keyboard-row:nth-child(2) .key {
                 width: calc(100% / 9);  /* 9 keys */
             }
-            
+
             .keyboard-row:nth-child(3) .key {
-                width: calc(100% / 9);  /* 9 keys (7 letters + 2 buttons) */
+                width: calc(100% / 7);  /* 7 keys, full width */
+            }
+
+            #spacebarRow {
+                width: 100%;
+            }
+
+            #spacebarRow .key-space {
+                width: 100%;
+                height: 52px;
+                font-size: 12px;
+                border-radius: 0;
+                border-right: none;
+                border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+                letter-spacing: 2px;
             }
         }
         
@@ -469,7 +493,7 @@
             
             #onScreenKeyboard {
                 gap: 0;
-                padding: 8px 0;
+                padding: 0;
             }
             
             #inputDisplay {
@@ -480,21 +504,29 @@
                 font-size: 40px;
                 margin-bottom: 160px;
             }
+
+            #spacebarRow .key-space {
+                height: 50px;
+            }
         }
         
         @media (max-width: 375px) {
             .key {
-                height: 48px;  /* Slightly smaller for very small screens */
+                height: 48px;
                 font-size: 14px;
             }
             
             #onScreenKeyboard {
                 gap: 0;
-                padding: 8px 0;
+                padding: 0;
             }
             
             #inputDisplay {
                 bottom: 200px;
+            }
+
+            #spacebarRow .key-space {
+                height: 48px;
             }
         }
 
@@ -2146,6 +2178,9 @@
                     <button class="key" data-key="n">N</button>
                     <button class="key" data-key="m">M</button>
                 </div>
+                <div class="keyboard-row" id="spacebarRow" style="display:none;">
+                    <button class="key key-space" data-key=" ">SPACE</button>
+                </div>
             </div>
         </div>
         
@@ -2418,7 +2453,8 @@
             sentenceTimer: null,
             sentenceTimeLeft: 30,
             currentSentenceIndex: 0,
-            usedSentences: []
+            usedSentences: [],
+            consecutiveSentenceFailures: 0
         };
 
         // Sentences for sentence mode (40-60 characters)
@@ -2551,13 +2587,19 @@
             if (isMobile) {
                 const normalKeyboard = document.getElementById('onScreenKeyboard');
                 const numberKeyboard = document.getElementById('numberKeyboard');
-                
+                const spacebarRow = document.getElementById('spacebarRow');
+
                 if (newMode === 'math') {
                     normalKeyboard.style.display = 'none';
                     numberKeyboard.classList.add('show');
                 } else {
                     normalKeyboard.style.display = '';
                     numberKeyboard.classList.remove('show');
+                }
+
+                // Show spacebar only during sentences phases (2 and 6 in journey)
+                if (spacebarRow) {
+                    spacebarRow.style.display = newMode === 'sentences' ? 'flex' : 'none';
                 }
             }
 
@@ -3352,6 +3394,7 @@
             game.consecutiveHits++;
             updateComboMultiplier();
             game.consecutiveMisses = 0;
+            game.consecutiveSentenceFailures = 0; // reset on success
             
             // Check journey phase transitions
             checkJourneyPhaseTransition();
@@ -3382,7 +3425,9 @@
             game.currentInput = '';
             game.missedWords++;
             resetCombo();
-            
+
+            game.consecutiveSentenceFailures = (game.consecutiveSentenceFailures || 0) + 1;
+
             const penalty = 15;
             const oldScore = game.score;
             game.score = Math.max(0, game.score - penalty);
@@ -3393,7 +3438,8 @@
             animateValue(scoreValue, oldScore, game.score, 400);
             setTimeout(() => scoreValue.classList.remove('score-decrease'), 500);
             
-            if (game.score === 0) {
+            // Game over: score hit zero OR 2 consecutive sentence failures
+            if (game.score === 0 || game.consecutiveSentenceFailures >= 2) {
                 dismissSentenceBox(() => gameOver());
                 return;
             }
@@ -4550,6 +4596,7 @@
             game.sentenceTimeLeft = 30;
             game.currentSentenceIndex = 0;
             game.usedSentences = [];
+            game.consecutiveSentenceFailures = 0;
             
             // Clear mobile input value
             mobileInput.value = '';
@@ -4596,6 +4643,12 @@
                     normalKeyboard.classList.remove('hide-for-challenge');
                     numberKeyboard.style.display = '';
                     numberKeyboard.classList.remove('show');
+                }
+
+                // Show spacebar row for sentences mode (standalone or journey)
+                const spacebarRow = document.getElementById('spacebarRow');
+                if (spacebarRow) {
+                    spacebarRow.style.display = (mode === 'sentences' || mode === 'journey') ? 'flex' : 'none';
                 }
 
                 // Mobile - use the hidden input to capture keyboard
