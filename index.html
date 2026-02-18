@@ -24,6 +24,40 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
     <style>
+        /* Force Material Symbols to block-render and never show fallback text */
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined' !important;
+            font-weight: normal;
+            font-style: normal;
+            font-size: 18px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+            font-display: block;
+            /* Hide text until font loads */
+            color: transparent;
+            transition: color 0.1s;
+        }
+        /* Once font is loaded (class added by JS), show icons */
+        .icons-loaded .material-symbols-outlined {
+            color: white;
+        }
+        /* Fallback: after 2s always show */
+        .material-symbols-outlined {
+            animation: showIcon 0s 2s forwards;
+        }
+        @keyframes showIcon {
+            to { color: white; }
+        }
+    </style>
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -634,21 +668,29 @@
             align-items: center;
         }
 
-        /* UI Elements */
-        #score {
-            font-size: 12px;  /* Reduced from 20px to match tablet */
-            font-weight: bold;
+        /* Shared pill — one source of truth so ALL topbar pills are identical height */
+        .topbar-pill {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;  /* Reduced by 2px (was 12px) */
-            padding: 6px 10px;  /* Reduced from 8px 16px to match tablet */
+            border-radius: 10px;
+            padding: 0 10px;
             box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.2);
             display: flex;
             align-items: center;
+            justify-content: center;
+            height: 32px;
+            font-size: 12px;
+            font-weight: bold;
+            box-sizing: border-box;
+            white-space: nowrap;
+        }
+
+        /* UI Elements */
+        #score {
+            justify-content: flex-start;
             gap: 5px;
-            height: 32px;  /* Reduced from 40px to match tablet */
         }
 
         #scoreValue {
@@ -699,18 +741,7 @@
         }
 
         #difficultyDisplay {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            padding: 6px 10px;
-            box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            height: 32px;
-            font-size: 12px;
-            font-weight: bold;
+            /* unique: nothing extra needed */
         }
 
         #difficultyDisplay:hover {
@@ -718,20 +749,8 @@
         }
 
         #speedDisplay {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            padding: 6px 10px;
-            box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            height: 32px;
-            font-size: 12px;
-            font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: background 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
             user-select: none;
             -webkit-user-select: none;
         }
@@ -742,20 +761,8 @@
         }
 
         #categoryDisplay {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;  /* Reduced by 2px (was 12px) */
-            padding: 6px 10px;  /* Reduced from 8px 16px to match tablet */
-            box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            height: 32px;  /* Reduced from 40px to match tablet */
-            font-size: 12px;  /* Reduced from 20px to match tablet */
-            font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: background 0.3s ease, transform 0.3s ease;
         }
 
         #categoryDisplay:hover {
@@ -1769,12 +1776,25 @@
             border-radius: 2px;
             width: 100%;
         }
-        
+
+        #sentencesMeta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 14px;
+        }
+
+        #sentencesHint {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.35);
+            font-family: 'Press Start 2P', cursive;
+        }
+
         #sentencesTimer {
             font-size: 11px;
             color: rgba(255, 255, 255, 0.5);
             font-family: 'Press Start 2P', cursive;
-            margin-bottom: 12px;
         }
         
         #sentencesText {
@@ -1786,6 +1806,7 @@
             word-break: keep-all;
             overflow-wrap: normal;
             white-space: normal;
+            margin-top: 14px;
         }
         
         #sentencesText .word {
@@ -1851,23 +1872,7 @@
                 padding: 8px 12px;
             }
             
-            #difficultyDisplay {
-                font-size: 12px;
-                padding: 6px 10px;
-                height: 32px;
-            }
-            
-            #categoryDisplay {
-                font-size: 12px;
-                padding: 6px 10px;
-                height: 32px;
-            }
-            
-            #score {
-                font-size: 12px;
-                padding: 6px 10px;
-                height: 32px;
-            }
+            /* Pills are already sized correctly via .topbar-pill */
             
             #pauseBtn, #restartGameBtn, #homeBtn {
                 width: 32px;
@@ -1962,22 +1967,22 @@
                 padding: 6px 10px;
             }
             
-            #difficultyDisplay {
+            .topbar-pill {
                 font-size: 10px;
-                padding: 5px 8px;
+                padding: 0 8px;
                 height: 28px;
+            }
+
+            #difficultyDisplay {
+                /* covered by .topbar-pill above */
             }
             
             #categoryDisplay {
-                font-size: 10px;
-                padding: 5px 8px;
-                height: 28px;
+                /* covered by .topbar-pill above */
             }
             
             #score {
-                font-size: 10px;
-                padding: 5px 8px;
-                height: 28px;
+                /* covered by .topbar-pill above */
             }
             
             #pauseBtn, #restartGameBtn, #homeBtn {
@@ -2083,9 +2088,9 @@
 <body>
     <div id="topbar">
         <div id="leftControls">
-            <div id="score">Score: <span id="scoreValue">0</span></div>
-            <div id="difficultyDisplay">Words</div>
-            <div id="speedDisplay">1x</div>
+            <div id="score" class="topbar-pill">Score: <span id="scoreValue">0</span></div>
+            <div id="difficultyDisplay" class="topbar-pill">Words</div>
+            <div id="speedDisplay" class="topbar-pill">1x</div>
         </div>
         <div id="rightControls">
             <button id="autoTestToggle" style="background: #3b82f6; display: none;" title="Toggle Auto-Test Mode">
@@ -2200,10 +2205,13 @@
     <!-- Sentences Mode Fixed Overlay -->
     <div id="sentencesOverlay">
         <div id="sentencesBox">
+            <div id="sentencesMeta">
+                <span id="sentencesHint">Start typing...</span>
+                <div id="sentencesTimer">30s</div>
+            </div>
             <div id="sentencesDurationBar">
                 <div id="sentencesDurationFill"></div>
             </div>
-            <div id="sentencesTimer">30s</div>
             <div id="sentencesText"></div>
         </div>
     </div>
@@ -3213,12 +3221,13 @@
             game.currentSentenceText = sentenceText;
             
             // Calculate duration:
-            // Journey: phase 2 = 18s, phase 7 = 12s; standalone sentences mode scales with score
+            // Journey: phase 2 = 18s, phase 7 = 12s; standalone sentences mode uses speed button setting
             let duration;
             if (game.mode === 'journey') {
                 duration = game.journeyPhase === 6 ? 12 : 18; // Phase 6 (500–799) = 12s, Phase 2 (100–199) = 18s
             } else {
-                duration = Math.max(8, 30 - Math.floor(game.score / 100));
+                // 1x = 24s, 2x = 18s, 3x = 12s
+                duration = sentenceSpeedDurations[speedMultiplier] || 24;
             }
             game.sentenceTimeLeft = duration;
             
@@ -3236,6 +3245,10 @@
             
             timerEl.textContent = `${duration}s`;
             timerEl.style.color = 'rgba(255,255,255,0.5)';
+
+            // Reset hint text
+            const hintEl = document.getElementById('sentencesHint');
+            if (hintEl) { hintEl.textContent = 'Start typing...'; }
             
             // Reset progress bar instantly (full width, no transition)
             fillEl.style.transition = 'none';
@@ -3296,6 +3309,11 @@
                     char.classList.add('current');
                 }
             });
+            // Update hint text on first keypress
+            const hintEl = document.getElementById('sentencesHint');
+            if (hintEl) {
+                hintEl.textContent = input.length > 0 ? 'Keep Going...' : 'Start typing...';
+            }
         }
         
         function dismissSentenceBox(callback) {
@@ -4309,31 +4327,125 @@
         const speedLevels = [1, 2, 3];
 
         const speedDisplay = document.getElementById('speedDisplay');
-        speedDisplay.addEventListener('click', () => {
-            // Disabled in sentences mode and journey mode (auto-controlled)
-            const currentMode = game.mode === 'journey' ? getJourneyPhaseMode() : game.mode;
-            if (currentMode === 'sentences' || game.mode === 'journey') return;
 
+        // Map speed multiplier → sentence countdown duration
+        // 1x = 24s, 2x = 18s, 3x = 12s
+        const sentenceSpeedDurations = { 1: 24, 2: 18, 3: 12 };
+
+        speedDisplay.addEventListener('click', () => {
+            // Disabled only in journey mode (auto-controlled)
+            if (game.mode === 'journey') return;
+
+            const currentMode = game.mode === 'journey' ? getJourneyPhaseMode() : game.mode;
             const currentIndex = speedLevels.indexOf(speedMultiplier);
             speedMultiplier = speedLevels[(currentIndex + 1) % speedLevels.length];
             speedDisplay.textContent = speedMultiplier + 'x';
 
-            // Apply instantly to all existing invaders
-            game.invaders.forEach(inv => {
-                if (!inv.isDying) {
-                    inv.speedY = game.invaderSpeed * (0.8 + Math.random() * 0.4) * speedMultiplier;
+            if (currentMode === 'sentences') {
+                // Sentences mode: if a sentence is active, dismiss it and re-show
+                // the SAME sentence with the new duration (full card fade-in from top)
+                if (game.isSentenceActive) {
+                    // Stop the running countdown
+                    if (game.sentenceTimer) {
+                        clearInterval(game.sentenceTimer);
+                        game.sentenceTimer = null;
+                    }
+                    // Remember the current sentence so we can replay it
+                    const savedSentence = game.currentSentenceText;
+                    const newDuration   = sentenceSpeedDurations[speedMultiplier] || 24;
+
+                    // Mark inactive so guards inside the old interval don't interfere
+                    game.isSentenceActive = false;
+                    game.currentInput = '';
+
+                    // Slide out the card, then re-spawn it with the new duration
+                    const box     = document.getElementById('sentencesBox');
+                    const overlay = document.getElementById('sentencesOverlay');
+                    const sid     = _sessionId;
+
+                    box.classList.remove('animate-in');
+                    void box.offsetWidth;
+                    box.classList.add('animate-out');
+
+                    setTimeout(() => {
+                        if (_sessionId !== sid) return; // session changed, abort
+                        overlay.classList.remove('show');
+                        box.classList.remove('animate-out');
+
+                        // Re-populate card with the same sentence + new duration
+                        game.isSentenceActive = true;
+                        game.currentInput = '';
+                        game.currentSentenceText = savedSentence;
+                        game.sentenceTimeLeft = newDuration;
+
+                        const textEl  = document.getElementById('sentencesText');
+                        const timerEl = document.getElementById('sentencesTimer');
+                        const fillEl  = document.getElementById('sentencesDurationFill');
+
+                        const words = savedSentence.split(' ');
+                        textEl.innerHTML = words.map(word =>
+                            `<span class="word">${word.split('').map(char => `<span class="char">${char}</span>`).join('')}</span>`
+                        ).join('<span class="char space">&nbsp;</span>');
+
+                        timerEl.textContent = `${newDuration}s`;
+                        timerEl.style.color = 'rgba(255,255,255,0.5)';
+                        fillEl.style.transition = 'none';
+                        fillEl.style.width = '100%';
+                        const hintEl2 = document.getElementById('sentencesHint');
+                        if (hintEl2) hintEl2.textContent = 'Start typing...';
+
+                        // Slide in from top
+                        overlay.classList.add('show');
+                        box.classList.remove('animate-out');
+                        void box.offsetWidth;
+                        box.classList.add('animate-in');
+
+                        // Start fresh countdown after slide-in (400ms)
+                        const _spawnSession = _sessionId;
+                        setTimeout(() => {
+                            if (_sessionId !== _spawnSession || !game.isSentenceActive) return;
+                            if (game.sentenceTimer) {
+                                clearInterval(game.sentenceTimer);
+                                game.sentenceTimer = null;
+                            }
+                            let localDuration = newDuration;
+                            game.sentenceTimer = setInterval(() => {
+                                if (_sessionId !== _spawnSession || !game.isSentenceActive) {
+                                    clearInterval(game.sentenceTimer);
+                                    game.sentenceTimer = null;
+                                    return;
+                                }
+                                if (game.isPaused) return;
+                                game.sentenceTimeLeft--;
+                                timerEl.textContent = `${Math.max(0, game.sentenceTimeLeft)}s`;
+                                timerEl.style.color = game.sentenceTimeLeft <= 5 ? '#ff4757' : 'rgba(255,255,255,0.5)';
+                                const pct = Math.max(0, (game.sentenceTimeLeft / localDuration) * 100);
+                                fillEl.style.transition = 'width 1s linear';
+                                fillEl.style.width = pct + '%';
+                                if (game.sentenceTimeLeft <= 0) {
+                                    skipSentence();
+                                }
+                            }, 1000);
+                        }, 400);
+                    }, 360); // match dismissSentenceBox animation duration
                 }
-            });
+            } else {
+                // Words / letters / math: apply new speed to existing invaders
+                game.invaders.forEach(inv => {
+                    if (!inv.isDying) {
+                        inv.speedY = game.invaderSpeed * (0.8 + Math.random() * 0.4) * speedMultiplier;
+                    }
+                });
+            }
         });
 
         // Update speed button state based on mode
         function updateSpeedButtonState() {
-            const currentMode = game.mode === 'journey' ? getJourneyPhaseMode() : game.mode;
-            const disabledModes = currentMode === 'sentences' || game.mode === 'journey';
-            if (disabledModes) {
+            // Only disable in journey mode (sentences mode is now speed-controllable)
+            if (game.mode === 'journey') {
                 speedDisplay.style.opacity = '0.35';
                 speedDisplay.style.cursor = 'not-allowed';
-                speedDisplay.title = 'Speed controlled automatically in this mode';
+                speedDisplay.title = 'Speed controlled automatically in Journey mode';
             } else {
                 speedDisplay.style.opacity = '1';
                 speedDisplay.style.cursor = 'pointer';
@@ -5313,6 +5425,12 @@ Play now at: ${window.location.href}`;
             const _mode = game.mode === 'journey' ? getJourneyPhaseMode() : game.mode;
             const _isMath = _mode === 'math' || game.isMathMode;
 
+            // Sentences mode: route all keys through handleSentenceInput
+            if (_mode === 'sentences' && game.isSentenceActive) {
+                handleSentenceInput({ key: keyValue });
+                return;
+            }
+
             if (keyValue === 'Backspace') {
                 game.currentInput = game.currentInput.slice(0, -1);
                 mobileInput.value = game.currentInput;
@@ -5604,6 +5722,21 @@ Play now at: ${window.location.href}`;
 
         // Initialize game - show start screen
         // Game starts when user clicks start button
+
+        // Ensure Material Symbols font is loaded before showing icons
+        (function() {
+            function markIconsLoaded() {
+                document.body.classList.add('icons-loaded');
+            }
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(markIconsLoaded);
+            } else {
+                // Fallback: mark loaded after short delay
+                setTimeout(markIconsLoaded, 500);
+            }
+            // Also force-show after 3s no matter what
+            setTimeout(markIconsLoaded, 3000);
+        })();
     </script>
 </body>
 </html>
