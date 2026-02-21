@@ -133,31 +133,12 @@
             touch-action: none;
         }
 
-        #gameContainer::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                radial-gradient(2px 2px at 20% 30%, white, transparent),
-                radial-gradient(2px 2px at 60% 70%, white, transparent),
-                radial-gradient(1px 1px at 50% 50%, white, transparent),
-                radial-gradient(1px 1px at 80% 10%, white, transparent),
-                radial-gradient(2px 2px at 90% 60%, white, transparent),
-                radial-gradient(1px 1px at 33% 80%, white, transparent),
-                radial-gradient(1px 1px at 15% 55%, white, transparent),
-                radial-gradient(2px 2px at 70% 25%, white, transparent),
-                radial-gradient(1px 1px at 45% 15%, white, transparent),
-                radial-gradient(1px 1px at 25% 90%, white, transparent);
-            background-size: 200% 200%, 300% 300%, 250% 250%, 280% 280%, 220% 220%, 
-                             260% 260%, 290% 290%, 240% 240%, 270% 270%, 230% 230%;
-            background-position: 0% 0%, 40% 60%, 50% 50%, 80% 10%, 90% 60%, 
-                                 33% 80%, 15% 55%, 70% 25%, 45% 15%, 25% 90%;
-            background-repeat: repeat;
-            opacity: 0.6;
+        #starCanvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             z-index: 0;
+            pointer-events: none;
         }
 
         #gameContainer.hidden {
@@ -1201,7 +1182,7 @@
             text-shadow: 0 0 6px rgba(16, 185, 129, 0.2);
         }
 
-        #celebrationBody #rocketIcon {
+        #celebrationRocketIcon {
             position: absolute;
             right: 20px;
             top: 32px;
@@ -1246,6 +1227,74 @@
             color: rgba(255, 255, 255, 0.9);
             font-family: 'Press Start 2P', cursive;
             line-height: 1.2;
+        }
+
+        /* Journey mode celebration tabs */
+        #journeyTabs {
+            display: none;
+            flex-direction: column;
+            margin-bottom: 8px;
+        }
+
+        .journey-tab-nav {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .journey-tab-btn {
+            flex: 0 0 auto;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            padding: 6px 6px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 7px;
+            color: rgba(255,255,255,0.45);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .journey-tab-btn.active {
+            background: rgba(255,255,255,0.14);
+            border-color: rgba(255,255,255,0.35);
+            color: #fff;
+        }
+
+        .journey-tab-content {
+            display: none;
+        }
+
+        .journey-tab-content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 12px;
+        }
+
+        .journey-stat-block {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .journey-stat-block.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .journey-stat-label {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 7px;
+            color: rgba(255,255,255,0.45);
+            line-height: 1.3;
+        }
+
+        .journey-stat-value {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 20px;
+            color: #ffd700;
+            text-shadow: 0 0 6px rgba(255, 215, 0, 0.2);
+            line-height: 1;
         }
 
         .graph-container {
@@ -1363,7 +1412,7 @@
                 font-size: 28px;
             }
 
-            #celebrationBody #rocketIcon {
+            #celebrationRocketIcon {
                 font-size: 48px;
                 right: 18px;
                 top: 28px;
@@ -2245,6 +2294,9 @@
             <button id="autoTestToggle" style="background: #3b82f6; display: none;" title="Toggle Auto-Test Mode">
                 <span style="font-size: 14px;">🤖 TEST</span>
             </button>
+            <button id="gameShuffleBtn" title="Generate fake data & preview" style="display:none;">
+                <span class="material-symbols-outlined">shuffle</span>
+            </button>
             <button id="celebrationPreviewBtn" title="Preview Celebration" style="display:none;">
                 <span class="material-symbols-outlined">emoji_events</span>
             </button>
@@ -2255,6 +2307,7 @@
     </div>
 
     <div id="gameContainer" tabindex="0">
+        <canvas id="starCanvas"></canvas>
         <div id="topSide"></div>
         <div id="bottomSide">
             <div id="gun">🚀</div>
@@ -2359,7 +2412,7 @@
                 
                 <div class="difficulty-option" data-mode="journey">
                     <div class="difficulty-text">
-                        <div class="difficulty-name">Journey</div>
+                        <div class="difficulty-name">Adventure</div>
                         <div class="difficulty-desc">Full mastery</div>
                     </div>
                     <span class="mode-emoji">🪐</span>
@@ -2432,7 +2485,7 @@
                             </div>
                         </div>
                         
-                        <div id="rocketIcon">🚀</div>
+                        <div id="celebrationRocketIcon">🚀</div>
                         
                         <div class="bottom-stats">
                             <div class="bottom-stats-left">
@@ -2445,6 +2498,76 @@
                             </div>
                         </div>
                         
+                        <!-- Journey mode 4-tab stats (shown only for journey) -->
+                        <div id="journeyTabs">
+                            <div class="journey-tab-nav">
+                                <button class="journey-tab-btn active" data-tab="words">Word</button>
+                                <button class="journey-tab-btn" data-tab="sentences">Sentence</button>
+                                <button class="journey-tab-btn" data-tab="math">Math</button>
+                                <button class="journey-tab-btn" data-tab="letters">Letter</button>
+                            </div>
+                            <!-- Words tab -->
+                            <div class="journey-tab-content active" id="jtab-words">
+                                <div class="journey-stat-block">
+                                    <div class="journey-stat-label">Completed</div>
+                                    <div class="journey-stat-value" id="jw-hit">0</div>
+                                </div>
+                                <div class="journey-stat-block">
+                                    <div class="journey-stat-label">Missed</div>
+                                    <div class="journey-stat-value" id="jw-missed">0</div>
+                                </div>
+                                <div class="journey-stat-block full-width">
+                                    <div class="journey-stat-label">Incorrect attempts</div>
+                                    <div class="journey-stat-value" id="jw-wrong">0</div>
+                                </div>
+                            </div>
+                            <!-- Sentences tab -->
+                            <div class="journey-tab-content" id="jtab-sentences">
+                                <div class="journey-stat-block">
+                                    <div class="journey-stat-label">Completed</div>
+                                    <div class="journey-stat-value" id="js-done">0</div>
+                                </div>
+                                <div class="journey-stat-block">
+                                    <div class="journey-stat-label">Missed</div>
+                                    <div class="journey-stat-value" id="js-skipped">0</div>
+                                </div>
+                                <div class="journey-stat-block full-width">
+                                    <div class="journey-stat-label">Word per minute</div>
+                                    <div class="journey-stat-value" id="js-wrong">0</div>
+                                </div>
+                            </div>
+                            <!-- Math tab -->
+                            <div class="journey-tab-content" id="jtab-math">
+                                <div class="journey-stat-block">
+                                    <div class="journey-stat-label">Completed</div>
+                                    <div class="journey-stat-value" id="jm-solved">0</div>
+                                </div>
+                                <div class="journey-stat-block">
+                                    <div class="journey-stat-label">Missed</div>
+                                    <div class="journey-stat-value" id="jm-missed">0</div>
+                                </div>
+                                <div class="journey-stat-block full-width">
+                                    <div class="journey-stat-label">Solved under 1s</div>
+                                    <div class="journey-stat-value" id="jm-fast">0</div>
+                                </div>
+                            </div>
+                            <!-- Letter tab -->
+                            <div class="journey-tab-content" id="jtab-letters">
+                                <div class="journey-stat-block">
+                                    <div class="journey-stat-label">Completed</div>
+                                    <div class="journey-stat-value" id="jl-hit">0</div>
+                                </div>
+                                <div class="journey-stat-block">
+                                    <div class="journey-stat-label">Missed</div>
+                                    <div class="journey-stat-value" id="jl-missed">0</div>
+                                </div>
+                                <div class="journey-stat-block full-width">
+                                    <div class="journey-stat-label">Letter per second</div>
+                                    <div class="journey-stat-value" id="jl-lps">0</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="graph-container">
                             <div id="graphViewToggle">
                                 <button id="btnViewToggle" onclick="toggleGraphView()">Click me</button>
@@ -2602,7 +2725,14 @@
             sentenceTimeLeft: 30,
             currentSentenceIndex: 0,
             usedSentences: [],
-            consecutiveSentenceFailures: 0
+            consecutiveSentenceFailures: 0,
+            // Journey per-phase stats
+            journeyStats: {
+                words:     { wordsHit: 0, wordsMissed: 0, incorrectKeys: 0, correctChars: 0 },
+                sentences: { completed: 0, skipped: 0, incorrectKeys: 0, correctChars: 0 },
+                math:      { solved: 0, missed: 0, fastSolves: 0, totalSolveTime: 0 },
+                letters:   { hit: 0, missed: 0 }
+            }
         };
 
         // Sentences for sentence mode (40-60 characters)
@@ -2726,9 +2856,13 @@
             game.isPaused = true;
             resetCombo();
             
-            // Clear all invaders
+            // Fade out all remaining invaders gracefully
             game.invaders.forEach(inv => {
-                if (inv.element) inv.element.remove();
+                if (inv.element) {
+                    inv.element.style.transition = 'opacity 0.4s ease-out';
+                    inv.element.style.opacity = '0';
+                    setTimeout(() => { try { inv.element.remove(); } catch(e){} }, 420);
+                }
             });
             game.invaders = [];
             game.isSentenceActive = false;
@@ -2772,10 +2906,17 @@
             // Resume after 2 seconds
             const _phaseSid = _sessionId;
             setTimeout(() => {
-                if (_sessionId !== _phaseSid) return; // stale if mode switched
+                if (_sessionId !== _phaseSid) return;
                 game.isPaused = false;
                 game._phaseTransitioning = false;
                 hidePhaseTransitionScreen();
+                // Kick off the correct spawner for the new phase
+                if (newMode === 'sentences') {
+                    spawnSentence();
+                } else if (newMode === 'math') {
+                    spawnMathInvader();
+                }
+                // words/letters: game loop handles spawning automatically
             }, 2000);
         }
         
@@ -3011,6 +3152,111 @@
         const timeSelection = document.getElementById('timeSelection');
         const topbar = document.getElementById('topbar');
 
+        // ── Animated Starfield ──────────────────────────────────────────────
+        (function initStarfield() {
+            const canvas = document.getElementById('starCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let W, H;
+            function resize() {
+                W = canvas.width  = canvas.offsetWidth;
+                H = canvas.height = canvas.offsetHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            // Three layers: far (slow, tiny), mid, near (fast, big)
+            const LAYERS = [
+                { count: 120, speed: 0.18, minR: 0.3, maxR: 0.8,  alpha: 0.45 },
+                { count: 60,  speed: 0.55, minR: 0.6, maxR: 1.3,  alpha: 0.65 },
+                { count: 28,  speed: 1.4,  minR: 1.0, maxR: 2.2,  alpha: 0.85 },
+            ];
+
+            // Occasional bright nebula streaks
+            const NEBULAE = Array.from({ length: 5 }, () => ({
+                x: Math.random() * 100,  // percentage
+                y: Math.random() * 100,
+                r: 40 + Math.random() * 80,
+                hue: [200, 230, 260, 180][Math.floor(Math.random() * 4)],
+                alpha: 0.018 + Math.random() * 0.022,
+            }));
+
+            const stars = LAYERS.flatMap(layer =>
+                Array.from({ length: layer.count }, () => ({
+                    x: Math.random(),  // 0-1 normalised
+                    y: Math.random(),
+                    r: layer.minR + Math.random() * (layer.maxR - layer.minR),
+                    speed: layer.speed * (0.7 + Math.random() * 0.6),
+                    alpha: layer.alpha * (0.6 + Math.random() * 0.4),
+                    twinkle: Math.random() * Math.PI * 2,
+                    twinkleSpeed: 0.01 + Math.random() * 0.025,
+                    // trail length proportional to speed
+                    trail: layer.speed > 1 ? (0.012 + Math.random() * 0.018) : 0,
+                }))
+            );
+
+            let raf;
+            function draw(ts) {
+                ctx.clearRect(0, 0, W, H);
+
+                // Subtle nebula blobs
+                NEBULAE.forEach(n => {
+                    const gx = n.x / 100 * W;
+                    const gy = n.y / 100 * H;
+                    const g = ctx.createRadialGradient(gx, gy, 0, gx, gy, n.r);
+                    g.addColorStop(0, `hsla(${n.hue},70%,60%,${n.alpha})`);
+                    g.addColorStop(1, 'transparent');
+                    ctx.fillStyle = g;
+                    ctx.beginPath();
+                    ctx.arc(gx, gy, n.r, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                stars.forEach(s => {
+                    // Speed tied to score with exponential ramp:
+                    // score 0   → nearly imperceptible drift (~stargazing)
+                    // score 200 → gentle glide
+                    // score 600+ → warp feel
+                    const score = (typeof game !== 'undefined') ? (game.score || 0) : 0;
+                    const speedScale = 0.008 + 0.292 * Math.pow(Math.min(score, 1000) / 1000, 2.2);
+
+                    // Move downward (rocket flying up = stars scroll down)
+                    s.y += s.speed * speedScale / H * 60;
+                    if (s.y > 1) { s.y = 0; s.x = Math.random(); }
+
+                    s.twinkle += s.twinkleSpeed;
+                    const twinkleAlpha = s.alpha * (0.75 + 0.25 * Math.sin(s.twinkle));
+
+                    const sx = s.x * W;
+                    const sy = s.y * H;
+
+                    // Trail for fast stars
+                    if (s.trail > 0) {
+                        const trailLen = s.trail * H;
+                        const grad = ctx.createLinearGradient(sx, sy - trailLen, sx, sy);
+                        grad.addColorStop(0, 'transparent');
+                        grad.addColorStop(1, `rgba(200,220,255,${twinkleAlpha * 0.6})`);
+                        ctx.strokeStyle = grad;
+                        ctx.lineWidth = s.r * 0.8;
+                        ctx.beginPath();
+                        ctx.moveTo(sx, sy - trailLen);
+                        ctx.lineTo(sx, sy);
+                        ctx.stroke();
+                    }
+
+                    // Star dot
+                    ctx.beginPath();
+                    ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(210,228,255,${twinkleAlpha})`;
+                    ctx.fill();
+                });
+
+                raf = requestAnimationFrame(draw);
+            }
+            raf = requestAnimationFrame(draw);
+        })();
+        // ────────────────────────────────────────────────────────────────────
+
         // Invader class
         class Invader {
             constructor() {
@@ -3173,10 +3419,16 @@
 
             reachedBottomSide() {
                 if (!this.isDying) {
-                    // Track missed word/math/letter when reaching the bottom side
                     game.missedWords++;
                     game.consecutiveMisses++;
                     resetCombo();
+
+                    // Journey stat tracking
+                    if (game.mode === 'journey') {
+                        if (this.isMathQuestion) game.journeyStats.math.missed++;
+                        else if (game.isLetterMode) game.journeyStats.letters.missed++;
+                        else game.journeyStats.words.wordsMissed++;
+                    }
                     
                     // In math mode, deduct 4 points and spawn new question
                     if (game.isMathMode && this.isMathQuestion) {
@@ -3230,7 +3482,7 @@
                     }, 500);
                     
                     // Check if game over
-                    if (game.score === 0 || game.consecutiveMisses >= 5) {
+                    if (game.score === 0 || game.consecutiveMisses >= 3) {
                         gameOver();
                         return;
                     }
@@ -3412,6 +3664,9 @@
             
             game.isSentenceActive = true;
             game.currentInput = '';
+            // Also clear mobileInput so stale text doesn't dispatch phantom keypresses on mobile
+            const _mobileInput = document.getElementById('mobileInput');
+            if (_mobileInput) _mobileInput.value = '';
             
             // Pick a sentence (avoid recent repeats)
             let availableSentences = sentences.filter((_, i) => !game.usedSentences.includes(i));
@@ -3460,11 +3715,15 @@
             fillEl.style.width = '100%';
             // Remove CSS-based transition shrink - bar will be updated by interval
             
-            // Show overlay and trigger slide-in animation
+            // Show overlay and trigger slide-in animation — reset ALL animation state first
             overlay.classList.add('show');
-            box.classList.remove('animate-out');
-            // Force reflow so animation restarts cleanly
-            void box.offsetWidth;
+            box.classList.remove('animate-in', 'animate-out');
+            // Force the browser to clear any animation forwards-fill by temporarily nulling animation
+            box.style.animation = 'none';
+            box.style.opacity = '';
+            box.style.transform = '';
+            void box.offsetWidth; // flush style, reset animation
+            box.style.animation = '';
             box.classList.add('animate-in');
             
             // Start progress bar + countdown AFTER slide-in (400ms)
@@ -3524,16 +3783,21 @@
         function dismissSentenceBox(callback) {
             const box     = document.getElementById('sentencesBox');
             const overlay = document.getElementById('sentencesOverlay');
-            const sid     = _sessionId; // capture current session
-            // Slide out downward via CSS animation
+            const sid     = _sessionId;
             box.classList.remove('animate-in');
+            box.style.animation = 'none';
+            box.style.opacity = '';
+            box.style.transform = '';
             void box.offsetWidth;
+            box.style.animation = '';
             box.classList.add('animate-out');
             setTimeout(() => {
-                // If a new game started while we were animating, bail out
                 if (_sessionId !== sid) return;
                 overlay.classList.remove('show');
                 box.classList.remove('animate-out');
+                // Mark sentence as no longer active right before the callback
+                // (keeps it true during the dismiss animation to block race spawns)
+                game.isSentenceActive = false;
                 if (callback) callback();
             }, 360);
         }
@@ -3541,11 +3805,11 @@
         function completeSentence() {
             clearInterval(game.sentenceTimer);
             game.sentenceTimer = null;
-            game.isSentenceActive = false;
+            // Keep isSentenceActive = true during dismiss animation to prevent
+            // the game loop's spawnInvader from racing in and double-spawning
             game.currentInput = '';
-            
-            // Play success sound (same as word kill)
             playSuccessSound();
+            if (game.mode === 'journey') game.journeyStats.sentences.completed++;
             
             // Award points — flat 20 pts, no time bonus
             const earnedPoints = 20;
@@ -3575,20 +3839,20 @@
             animateValue(scoreValue, oldScore, game.score, 400);
             setTimeout(() => scoreValue.classList.remove('score-increase'), 500);
             
-            // Slide out then spawn next
+            // Slide out then spawn next — skip if phase transition just fired
             dismissSentenceBox(() => {
-                if (!game.isGameOver) spawnSentence();
+                if (!game.isGameOver && !game._phaseTransitioning) spawnSentence();
             });
         }
         
         function skipSentence() {
             clearInterval(game.sentenceTimer);
             game.sentenceTimer = null;
-            game.isSentenceActive = false;
+            // Keep isSentenceActive = true during dismiss animation (cleared in dismissSentenceBox)
             game.currentInput = '';
             game.missedWords++;
             resetCombo();
-
+            if (game.mode === 'journey') game.journeyStats.sentences.skipped++;
             game.consecutiveSentenceFailures = (game.consecutiveSentenceFailures || 0) + 1;
 
             const penalty = 15;
@@ -3652,20 +3916,30 @@
 
         function updateScore(word, invader = null) {
             let basePoints = 0;
+            const js = game.journeyStats;
+            const inJourney = game.mode === 'journey';
             
-            // Mode-based scoring
+            // Mode-based scoring + journey stat tracking
             if (invader && invader.isSentence) {
-                basePoints = 20; // flat 20 pts
+                basePoints = 20;
             } else if (invader && invader.isMathQuestion) {
                 basePoints = 10;
-                // +1 bonus if answered in under 1 second
-                if (game.mathQuestionStartTime && (Date.now() - game.mathQuestionStartTime) < 1000) {
-                    basePoints += 1;
+                const fast = game.mathQuestionStartTime && (Date.now() - game.mathQuestionStartTime) < 1000;
+                if (fast) basePoints += 1;
+                if (inJourney) {
+                    js.math.solved++;
+                    if (fast) js.math.fastSolves++;
+                    if (game.mathQuestionStartTime) js.math.totalSolveTime += Date.now() - game.mathQuestionStartTime;
                 }
-            } else if (invader && invader.isNumber) {
-                basePoints = 5; // 3-digit numbers
+            } else if (invader && (invader.isLetter || invader.isNumber)) {
+                basePoints = invader.isNumber ? 5 : word.length;
+                if (inJourney) js.letters.hit++;
             } else {
-                basePoints = word.length; // 1 point per character for words
+                basePoints = word.length;
+                if (inJourney) {
+                    js.words.wordsHit++;
+                    js.words.correctChars += word.length;
+                }
             }
             
             // Apply combo multiplier
@@ -4398,9 +4672,11 @@
                 if (nextChar !== undefined && e.key.toLowerCase() === nextChar.toLowerCase()) {
                     game.currentInput += nextChar;
                     game.correctCharacters++;
+                    if (game.mode === 'journey') game.journeyStats.sentences.correctChars++;
                 } else if (nextChar !== undefined) {
                     // Wrong key
                     game.incorrectAttempts++;
+                    if (game.mode === 'journey') game.journeyStats.sentences.incorrectKeys++;
                     resetCombo();
                     playErrorSound();
                 }
@@ -4763,6 +5039,12 @@
             game.currentSentenceIndex = 0;
             game.usedSentences = [];
             game.consecutiveSentenceFailures = 0;
+            game.journeyStats = {
+                words:     { wordsHit: 0, wordsMissed: 0, incorrectKeys: 0, correctChars: 0 },
+                sentences: { completed: 0, skipped: 0, incorrectKeys: 0, correctChars: 0 },
+                math:      { solved: 0, missed: 0, fastSolves: 0, totalSolveTime: 0 },
+                letters:   { hit: 0, missed: 0 }
+            };
             
             // Clear mobile input value
             mobileInput.value = '';
@@ -4774,7 +5056,7 @@
                 'words': 'Words',
                 'sentences': 'Sentences', 
                 'math': 'Math',
-                'journey': 'Journey'
+                'journey': 'Adventure'
             };
             difficultyDisplay.textContent = modeNames[mode];
             
@@ -4848,116 +5130,144 @@
         // Toggle pause
         // Show celebration screen at score 1000
         function showCelebration() {
-            // Stop everything cleanly
             fullCleanup();
             game.isPaused = true;
-
-            // Hide the game container
             document.getElementById('gameContainer').classList.add('hidden');
             
-            // Calculate stats
             const totalTimeSeconds = (Date.now() - game.startTime) / 1000;
             const totalTimeMinutes = totalTimeSeconds / 60;
-            
             const isMathModeGame = game.mode === 'math';
-            
-            if (isMathModeGame) {
-                // Math mode stats
-                // SPS = solved per second
-                const questionsAnswered = game.mathQuestionsAnswered || 0;
-                const sps = totalTimeSeconds > 0 ? (questionsAnswered / totalTimeSeconds).toFixed(2) : '0.00';
-                const spsNum = parseFloat(sps);
-                
-                // Avg solve time in seconds
-                const avgSolveTime = questionsAnswered > 0
-                    ? ((game.totalMathSolveTime || 0) / questionsAnswered / 1000).toFixed(1)
-                    : 0;
-                
-                // Wrong answers count
-                const wrongAnswers = game.incorrectAttempts;
-                
-                // Determine rank based on score
-                let rank;
-                const s = game.score;
-                if (s >= 900)      rank = 'OTAI';
-                else if (s >= 800) rank = 'LEGEND';
-                else if (s >= 700) rank = 'JAGUH';
-                else if (s >= 600) rank = 'ELITE';
-                else if (s >= 500) rank = 'GEMPAK';
-                else if (s >= 400) rank = 'WIRA';
-                else if (s >= 300) rank = 'POWER';
-                else if (s >= 200) rank = 'BLUR';
-                else if (s >= 100) rank = 'MEH';
-                else               rank = 'NOOB';
-                
-                document.getElementById('playerRank').textContent = rank;
-                
-                // Update labels for math mode
-                document.getElementById('celebrationWpmLabel').textContent = 'SPS';
-                document.getElementById('celebrationAccuracyLabel').textContent = 'AVG SOLVE';
-                document.getElementById('celebrationIncorrectLabel').textContent = 'Wrong answers';
-                
-                animateValue('celebrationScoreValue', 0, game.score, 1200);
-                // SPS shown with 2 decimal places - animate numerically then format
-                const spsEl = document.getElementById('celebrationWpm');
-                let spsAnim = 0;
-                const spsSteps = 60;
-                const spsInc = spsNum / spsSteps;
-                const spsInterval = setInterval(() => {
-                    spsAnim += spsInc;
-                    if (spsAnim >= spsNum) { spsAnim = spsNum; clearInterval(spsInterval); }
-                    spsEl.textContent = spsAnim.toFixed(2);
-                }, 2000 / spsSteps);
-                // Avg solve time - show as seconds
-                document.getElementById('celebrationAccuracy').textContent = avgSolveTime + 's';
-                document.getElementById('celebrationAccuracy').style.color = '#10b981';
-                document.getElementById('celebrationAccuracy').style.textShadow = '0 0 6px rgba(16, 185, 129, 0.2)';
-                animateValue('celebrationIncorrect', 0, wrongAnswers, 1200);
-                animateValue('celebrationMissed', 0, game.missedWords, 1200);
-                
-                // Graph: SPS over time vs avgSolveTime
-                game._mathGraphMode = true;
-                
-            } else {
-                // WPM calculation (assuming average 5 characters per word)
-                const wordsTyped = game.correctCharacters / 5;
-                const wpm = Math.round(wordsTyped / totalTimeMinutes);
-                
-                // Accuracy calculation
-                const totalAttempts = game.correctCharacters + game.incorrectAttempts;
-                const accuracy = totalAttempts > 0 ? Math.round((game.correctCharacters / totalAttempts) * 100) : 0;
-                
-                // Determine player rank based on score
-                let rank;
-                const s = game.score;
-                if (s >= 900)      rank = 'OTAI';
-                else if (s >= 800) rank = 'LEGEND';
-                else if (s >= 700) rank = 'JAGUH';
-                else if (s >= 600) rank = 'ELITE';
-                else if (s >= 500) rank = 'GEMPAK';
-                else if (s >= 400) rank = 'WIRA';
-                else if (s >= 300) rank = 'POWER';
-                else if (s >= 200) rank = 'BLUR';
-                else if (s >= 100) rank = 'MEH';
-                else               rank = 'NOOB';
-                
-                document.getElementById('playerRank').textContent = rank;
-                
-                // Reset labels for non-math mode
-                document.getElementById('celebrationWpmLabel').textContent = 'WPM';
-                document.getElementById('celebrationAccuracyLabel').textContent = 'ACCURACY';
-                document.getElementById('celebrationIncorrectLabel').textContent = 'Incorrect attempts';
-                document.getElementById('celebrationAccuracy').style.color = '';
-                document.getElementById('celebrationAccuracy').style.textShadow = '';
-                
+            const isJourney = game.mode === 'journey';
+
+            // Rank helper
+            function getRank(s) {
+                if (s >= 900) return 'OTAI';
+                if (s >= 800) return 'LEGEND';
+                if (s >= 700) return 'JAGUH';
+                if (s >= 600) return 'ELITE';
+                if (s >= 500) return 'GEMPAK';
+                if (s >= 400) return 'WIRA';
+                if (s >= 300) return 'POWER';
+                if (s >= 200) return 'BLUR';
+                if (s >= 100) return 'MEH';
+                return 'NOOB';
+            }
+
+            document.getElementById('playerRank').textContent = getRank(game.score);
+            animateValue('celebrationScoreValue', 0, game.score, 1200);
+
+            const leftStats   = document.querySelector('.left-stats');
+            const bottomStats = document.querySelector('.bottom-stats');
+            const journeyTabs = document.getElementById('journeyTabs');
+            const rocketIcon  = document.getElementById('celebrationRocketIcon');
+
+            if (isJourney) {
+                // Hide standard stats, show journey tabs
+                leftStats.style.display   = 'none';
+                bottomStats.style.display = 'none';
+                rocketIcon.style.display  = 'none';
+                journeyTabs.style.display = 'flex';
+                document.getElementById('graphView').style.display      = 'none';
+                document.getElementById('speedoView').style.display     = '';
+                document.getElementById('graphViewToggle').style.display = 'none';
+                document.getElementById('celebrationShuffleBtn').style.display = 'none';
+                document.getElementById('celebrationPreviewBtn').style.display = 'none';
+
+                // Populate words tab
+                const jw = game.journeyStats.words;
+                document.getElementById('jw-hit').textContent    = jw.wordsHit;
+                document.getElementById('jw-missed').textContent = jw.wordsMissed;
+                document.getElementById('jw-wrong').textContent  = jw.incorrectKeys;
+
+                // Populate sentences tab
+                const js = game.journeyStats.sentences;
+                const sentenceWpm = totalTimeMinutes > 0 ? Math.round((js.correctChars / 5) / totalTimeMinutes) : 0;
+                document.getElementById('js-done').textContent    = js.completed;
+                document.getElementById('js-skipped').textContent = js.skipped;
+                document.getElementById('js-wrong').textContent   = sentenceWpm;
+
+                // Populate math tab
+                const jm = game.journeyStats.math;
+                document.getElementById('jm-solved').textContent = jm.solved;
+                document.getElementById('jm-missed').textContent = jm.missed;
+                document.getElementById('jm-fast').textContent   = jm.fastSolves > 0 ? jm.fastSolves + '⚡️' : '0';
+
+                // Populate letters tab
+                const jl = game.journeyStats.letters;
+                const lps = totalTimeSeconds > 0 ? (jl.hit / totalTimeSeconds).toFixed(2) : '0.00';
+                document.getElementById('jl-hit').textContent    = jl.hit;
+                document.getElementById('jl-missed').textContent = jl.missed;
+                document.getElementById('jl-lps').textContent    = lps;
+
+                // Reset tabs to first tab active
+                document.querySelectorAll('.journey-tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.journey-tab-content').forEach(c => c.classList.remove('active'));
+                document.querySelector('.journey-tab-btn[data-tab="words"]').classList.add('active');
+                document.getElementById('jtab-words').classList.add('active');
+
                 game._mathGraphMode = false;
-                
-                // Animate all numeric values
-                animateValue('celebrationScoreValue', 0, game.score, 1200);
-                animateValue('celebrationWpm', 0, wpm, 1200);
-                animateValue('celebrationAccuracy', 0, accuracy, 1200);
-                animateValue('celebrationIncorrect', 0, game.incorrectAttempts, 1200);
-                animateValue('celebrationMissed', 0, game.missedWords, 1200);
+
+            } else {
+                // Standard modes: restore graph and toggle
+                document.getElementById('graphView').style.display       = '';
+                document.getElementById('graphViewToggle').style.display = '';
+                document.getElementById('celebrationShuffleBtn').style.display = 'none';
+                document.getElementById('celebrationPreviewBtn').style.display = 'none';
+                // Standard modes (math or words/sentences)
+                leftStats.style.display   = '';
+                bottomStats.style.display = '';
+                rocketIcon.style.display  = '';
+                journeyTabs.style.display = 'none';
+                rocketIcon.style.display  = '';
+                journeyTabs.style.display = 'none';
+
+                if (isMathModeGame) {
+                    const questionsAnswered = game.mathQuestionsAnswered || 0;
+                    const sps = totalTimeSeconds > 0 ? (questionsAnswered / totalTimeSeconds).toFixed(2) : '0.00';
+                    const spsNum = parseFloat(sps);
+                    const avgSolveTime = questionsAnswered > 0
+                        ? ((game.totalMathSolveTime || 0) / questionsAnswered / 1000).toFixed(1)
+                        : 0;
+                    const wrongAnswers = game.incorrectAttempts;
+
+                    document.getElementById('celebrationWpmLabel').textContent = 'SPS';
+                    document.getElementById('celebrationAccuracyLabel').textContent = 'AVG SOLVE';
+                    document.getElementById('celebrationIncorrectLabel').textContent = 'Wrong answers';
+
+                    const spsEl = document.getElementById('celebrationWpm');
+                    let spsAnim = 0;
+                    const spsSteps = 60;
+                    const spsInc = spsNum / spsSteps;
+                    const spsInterval = setInterval(() => {
+                        spsAnim += spsInc;
+                        if (spsAnim >= spsNum) { spsAnim = spsNum; clearInterval(spsInterval); }
+                        spsEl.textContent = spsAnim.toFixed(2);
+                    }, 2000 / spsSteps);
+                    document.getElementById('celebrationAccuracy').textContent = avgSolveTime + 's';
+                    document.getElementById('celebrationAccuracy').style.color = '#10b981';
+                    document.getElementById('celebrationAccuracy').style.textShadow = '0 0 6px rgba(16, 185, 129, 0.2)';
+                    animateValue('celebrationIncorrect', 0, wrongAnswers, 1200);
+                    animateValue('celebrationMissed', 0, game.missedWords, 1200);
+                    game._mathGraphMode = true;
+
+                } else {
+                    const wordsTyped = game.correctCharacters / 5;
+                    const wpm = Math.round(wordsTyped / totalTimeMinutes);
+                    const totalAttempts = game.correctCharacters + game.incorrectAttempts;
+                    const accuracy = totalAttempts > 0 ? Math.round((game.correctCharacters / totalAttempts) * 100) : 0;
+
+                    document.getElementById('celebrationWpmLabel').textContent = 'WPM';
+                    document.getElementById('celebrationAccuracyLabel').textContent = 'ACCURACY';
+                    document.getElementById('celebrationIncorrectLabel').textContent = 'Incorrect attempts';
+                    document.getElementById('celebrationAccuracy').style.color = '';
+                    document.getElementById('celebrationAccuracy').style.textShadow = '';
+                    game._mathGraphMode = false;
+
+                    animateValue('celebrationWpm', 0, wpm, 1200);
+                    animateValue('celebrationAccuracy', 0, accuracy, 1200);
+                    animateValue('celebrationIncorrect', 0, game.incorrectAttempts, 1200);
+                    animateValue('celebrationMissed', 0, game.missedWords, 1200);
+                }
             }
             
             // Update graph time labels with actual clock times
@@ -5000,10 +5310,13 @@
             // Hide default top bar
             document.getElementById('topbar').classList.remove('show');
             
-            // Draw performance graph
-            drawPerformanceGraph();
-            // Reset toggle to graph view
-            setGraphView('graph');
+            // Draw appropriate visualization
+            if (isJourney) {
+                setTimeout(() => drawSpeedometer(), 50);
+            } else {
+                drawPerformanceGraph();
+                setGraphView('graph');
+            }
             
             // Show celebration screen
             document.getElementById('celebrationScreen').style.display = 'flex';
@@ -5489,6 +5802,17 @@ Play now at: ${window.location.href}`;
             startGame(game.mode);
         });
 
+        // Journey tab switching
+        document.querySelectorAll('.journey-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                document.querySelectorAll('.journey-tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.journey-tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('jtab-' + tab).classList.add('active');
+            });
+        });
+
         document.getElementById('playAgainLink').addEventListener('click', () => {
             document.getElementById('celebrationScreen').style.display = 'none';
             startGame(game.mode);
@@ -5508,34 +5832,51 @@ Play now at: ${window.location.href}`;
         });
 
         document.getElementById('celebrationShuffleBtn').addEventListener('click', () => {
-            const modes = ['words', 'sentences', 'math', 'journey'];
-            game.mode = modes[Math.floor(Math.random() * modes.length)];
-            game._mathGraphMode = game.mode === 'math';
-
-            // Randomise game stats
-            game.score        = 1000 + Math.floor(Math.random() * 4000);
-            game.startTime    = Date.now() - (Math.random() * 20 + 2) * 60 * 1000;
-
-            const totalMins   = (Date.now() - game.startTime) / 60000;
-            game.correctCharacters  = Math.floor(Math.random() * 80 * totalMins * 5 + 100);
-            game.incorrectAttempts  = Math.floor(Math.random() * game.correctCharacters * 0.15);
-            game.missedWords        = Math.floor(Math.random() * 30);
-
-            // Rebuild history arrays with varied random data
-            const samples = 20 + Math.floor(Math.random() * 20);
-            game.wpmHistory      = Array.from({ length: samples }, (_, i) => {
-                const base = 30 + Math.random() * 120;
-                return Math.max(5, base + Math.sin(i / 3) * 20);
-            });
-            game.accuracyHistory = Array.from({ length: samples }, (_, i) => {
-                return Math.min(100, Math.max(50, 70 + Math.random() * 30 - Math.cos(i / 4) * 10));
-            });
-            game.spmHistory      = Array.from({ length: samples }, () => +(Math.random() * 3).toFixed(2));
-            game.solveTimeHistory= Array.from({ length: samples }, () => +(1 + Math.random() * 9).toFixed(1));
-            game.mathQuestionsAnswered = Math.floor(Math.random() * 80 + 10);
-            game.totalMathSolveTime    = game.mathQuestionsAnswered * (1 + Math.random() * 5) * 1000;
-
-            // Re-render the celebration screen with new data
+            if (game.mode === 'journey') {
+                // Generate fake journey stats for testing
+                game.score     = 1000;
+                game.startTime = Date.now() - (Math.random() * 15 + 3) * 60 * 1000;
+                game.journeyStats = {
+                    words:     {
+                        wordsHit:     Math.floor(Math.random() * 80 + 20),
+                        wordsMissed:  Math.floor(Math.random() * 15),
+                        incorrectKeys: Math.floor(Math.random() * 40),
+                        correctChars: Math.floor(Math.random() * 400 + 100)
+                    },
+                    sentences: {
+                        completed:    Math.floor(Math.random() * 10 + 2),
+                        skipped:      Math.floor(Math.random() * 5),
+                        incorrectKeys: Math.floor(Math.random() * 30)
+                    },
+                    math:      {
+                        solved:       Math.floor(Math.random() * 30 + 5),
+                        missed:       Math.floor(Math.random() * 10),
+                        fastSolves:   Math.floor(Math.random() * 10),
+                        totalSolveTime: Math.floor(Math.random() * 60000 + 10000)
+                    },
+                    letters:   {
+                        hit:    Math.floor(Math.random() * 50 + 10),
+                        missed: Math.floor(Math.random() * 15)
+                    }
+                };
+            } else {
+                const modes = ['words', 'sentences', 'math'];
+                game.mode = modes[Math.floor(Math.random() * modes.length)];
+                game._mathGraphMode = game.mode === 'math';
+                game.score        = 1000 + Math.floor(Math.random() * 4000);
+                game.startTime    = Date.now() - (Math.random() * 20 + 2) * 60 * 1000;
+                const totalMins   = (Date.now() - game.startTime) / 60000;
+                game.correctCharacters  = Math.floor(Math.random() * 80 * totalMins * 5 + 100);
+                game.incorrectAttempts  = Math.floor(Math.random() * game.correctCharacters * 0.15);
+                game.missedWords        = Math.floor(Math.random() * 30);
+                const samples = 20 + Math.floor(Math.random() * 20);
+                game.wpmHistory      = Array.from({ length: samples }, (_, i) => Math.max(5, 30 + Math.random() * 120 + Math.sin(i / 3) * 20));
+                game.accuracyHistory = Array.from({ length: samples }, (_, i) => Math.min(100, Math.max(50, 70 + Math.random() * 30 - Math.cos(i / 4) * 10)));
+                game.spmHistory      = Array.from({ length: samples }, () => +(Math.random() * 3).toFixed(2));
+                game.solveTimeHistory= Array.from({ length: samples }, () => +(1 + Math.random() * 9).toFixed(1));
+                game.mathQuestionsAnswered = Math.floor(Math.random() * 80 + 10);
+                game.totalMathSolveTime    = game.mathQuestionsAnswered * (1 + Math.random() * 5) * 1000;
+            }
             showCelebration();
         });
         
@@ -5917,6 +6258,19 @@ Play now at: ${window.location.href}`;
                 
                 showCelebration();
             }
+        });
+
+        // Game topbar shuffle button — journey mode only, generates fake stats & shows celebration
+        document.getElementById('gameShuffleBtn').addEventListener('click', () => {
+            game.score     = 1000;
+            game.startTime = Date.now() - (Math.random() * 15 + 3) * 60 * 1000;
+            game.journeyStats = {
+                words:     { wordsHit: Math.floor(Math.random() * 80 + 20), wordsMissed: Math.floor(Math.random() * 15), incorrectKeys: Math.floor(Math.random() * 40), correctChars: Math.floor(Math.random() * 400 + 100) },
+                sentences: { completed: Math.floor(Math.random() * 10 + 2), skipped: Math.floor(Math.random() * 5), incorrectKeys: Math.floor(Math.random() * 30) },
+                math:      { solved: Math.floor(Math.random() * 30 + 5), missed: Math.floor(Math.random() * 10), fastSolves: Math.floor(Math.random() * 10), totalSolveTime: Math.floor(Math.random() * 60000 + 10000) },
+                letters:   { hit: Math.floor(Math.random() * 50 + 10), missed: Math.floor(Math.random() * 15) }
+            };
+            showCelebration();
         });
         
         function startAutoTest() {
